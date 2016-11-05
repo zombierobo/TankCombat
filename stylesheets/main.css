@@ -1,0 +1,42 @@
+* { 
+	margin: 0; padding: 0; box-sizing: border-box; 
+}
+
+ul {
+	margin: 10px;
+	padding: 10px;
+	border : solid 1px;
+}
+
+body {
+	background: white;
+}
+
+#game-arena {
+
+	padding-top: 20px;
+	padding-right: 20px;
+	padding-left: 20px;
+	padding-bottom: 20px;
+	margin: 20px 20px 20px 20px;
+	height: 400px;
+	width: 600px;
+	border: solid;
+	border-color: black;
+}
+
+.mobile-element {
+	background-color: red;
+	border: solid ;
+	border-color: yellow ;
+	height: 30px;
+	width: 30px;
+}
+
+.own-element {
+	background-color: red;
+}
+
+.other-element {
+	background-color: blue;
+}
