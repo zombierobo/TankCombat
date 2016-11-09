@@ -51,41 +51,41 @@ function Tank(width , length , color){
 	// Push Tank Body components which are associated with the tank_orientation.tank_angle
 
 	// push Body (1) (the number indicates the numeric id of the component in the model diagram)
-	this.tank_body_components.push(new RectangularComponent(0,0,3/5*this.tank_size.width , 5/6.5*this.tank_size.length,'green'));
+	this.tank_body_components.push(new RectangularComponent(0,0,3/5*this.tank_size.width , 5/6.5*this.tank_size.length,'#777254'));
 	
 	// push Color Box (5)
-	this.tank_body_components.push(new RectangularComponent(-(1.5/5*this.tank_size.width/2 + 0.375/6.5*this.tank_size.length+1/6.5*this.tank_size.length/2), 0,1/5*this.tank_size.width , 1/6.5*this.tank_size.length,this.tank_color));
+	this.tank_body_components.push(new RectangularComponent(1.5/5*this.tank_size.width/2 + 0.375/6.5*this.tank_size.length+1/6.5*this.tank_size.length/2, 0,1/5*this.tank_size.width , 1/6.5*this.tank_size.length,this.tank_color));
 	
 	// push Body rim (2)
-	this.tank_body_components.push(new RectangularComponent(0,(3/5*this.tank_size.width/2 + 0.25/5*this.tank_size.width/2), 0.25/5 * this.tank_size.width , 5/6.5*this.tank_size.length,'red'));
+	this.tank_body_components.push(new RectangularComponent(0,(3/5*this.tank_size.width/2 + 0.25/5*this.tank_size.width/2), 0.25/5 * this.tank_size.width , 5/6.5*this.tank_size.length,'#284728'));
 	
 	// push Body rim (3)
-	this.tank_body_components.push(new RectangularComponent(0, -(3/5*this.tank_size.width/2 + 0.25/5*this.tank_size.width/2), 0.25/5 * this.tank_size.width , 5/6.5*this.tank_size.length,'red'));
+	this.tank_body_components.push(new RectangularComponent(0, -(3/5*this.tank_size.width/2 + 0.25/5*this.tank_size.width/2), 0.25/5 * this.tank_size.width , 5/6.5*this.tank_size.length,'#284728'));
 	
 	// push Front/Tail Bumper (6)
-	this.tank_body_components.push(new RectangularComponent( -(5/6.5*this.tank_size.length/2 + 0.5/6.5 * this.tank_size.length/2), 0,3.5/5*this.tank_size.width ,0.5/6.5 * this.tank_size.length,'orange'));
+	this.tank_body_components.push(new RectangularComponent( -(5/6.5*this.tank_size.length/2 + 0.5/6.5 * this.tank_size.length/2), 0,3.5/5*this.tank_size.width ,0.5/6.5 * this.tank_size.length,'#40433B'));
 	
 	// push Front/Tail Bumper (7)
-	this.tank_body_components.push(new RectangularComponent( (5/6.5*this.tank_size.length/2 + 0.5/6.5 * this.tank_size.length/2), 0,3.5/5*this.tank_size.width ,0.5/6.5 * this.tank_size.length,'orange'));
+	this.tank_body_components.push(new RectangularComponent( (5/6.5*this.tank_size.length/2 + 0.5/6.5 * this.tank_size.length/2), 0,3.5/5*this.tank_size.width ,0.5/6.5 * this.tank_size.length,'#40433B'));
 
 	// push Tank Wheel (8)
-	this.tank_body_components.push(new RectangularComponent(0,-(3/5*this.tank_size.width/2+ 0.25/5*this.tank_size.width + 0.75/5*this.tank_size.width/2),0.75/5*this.tank_size.width,this.tank_size.length,'purple'));
+	this.tank_body_components.push(new RectangularComponent(0,-(3/5*this.tank_size.width/2+ 0.25/5*this.tank_size.width + 0.75/5*this.tank_size.width/2),0.75/5*this.tank_size.width,this.tank_size.length,'#23221E'));
 
 	// push Tank Wheel (9)
-	this.tank_body_components.push(new RectangularComponent(0,(3/5*this.tank_size.width/2+ 0.25/5*this.tank_size.width +0.75/5*this.tank_size.width/2),0.75/5*this.tank_size.width,this.tank_size.length,'purple'));
+	this.tank_body_components.push(new RectangularComponent(0,(3/5*this.tank_size.width/2+ 0.25/5*this.tank_size.width +0.75/5*this.tank_size.width/2),0.75/5*this.tank_size.width,this.tank_size.length,'#23221E'));
 
 	// -------------------------------------
 
 	// Push Tank Gun components which are associated with the tank_orientation.tank_gun_angle .
 	
 	// push Tank Gun (10)
-	this.tank_gun_components.push(new RectangularComponent(5/6.5*this.tank_size.length/2,0 ,0.4/5*this.tank_size.width ,5/6.5*this.tank_size.length,'blue'));
+	this.tank_gun_components.push(new RectangularComponent(5/6.5*this.tank_size.length/2,0 ,0.4/5*this.tank_size.width ,5/6.5*this.tank_size.length,'#636557'));
 
 	// push Gun Head (11)
-	this.tank_gun_components.push(new RectangularComponent(5/6.5*this.tank_size.length+0.75/6.5*this.tank_size.length/2,0,0.6/5*this.tank_size.width ,0.75/6.5*this.tank_size.length,'black'));
+	this.tank_gun_components.push(new RectangularComponent(5/6.5*this.tank_size.length+0.75/6.5*this.tank_size.length/2,0,0.6/5*this.tank_size.width ,0.75/6.5*this.tank_size.length,'#2A2C26'));
 
 	// push Tank Gate (4)
-	this.tank_gun_components.push(new CircularComponent(0,0, 1.5/5*this.tank_size.width/2,'black'));
+	this.tank_gun_components.push(new CircularComponent(0,0, 1.5/5*this.tank_size.width/2,'#414339'));
 
 	// --------------------------------------
 }
