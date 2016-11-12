@@ -10,14 +10,15 @@ var frame_rate = 1000/60;
 var scale = 0.5;
 var tank_width = 100 * scale;
 var tank_length = 130 * scale;
-var tank_color = 'grey';
+var tank_color = 'blue';
 
 var t1 = new Tank(tank_width , tank_length , tank_color);
 t1.set_tank_position({ x:canvas.width/2 , y:canvas.height/2});
 
-var tank_rotation = 3; // degrees
-var gun_rotation = 3; // degrees
-var position_offset = 2;
+var tank_control_config = {};
+tank_control_config.tank_rotation = 2; // degrees
+tank_control_config.gun_rotation = 3; // degrees
+tank_control_config.position_offset = 2;
 
 function init(){	
 	setInterval(gameLoop , frame_rate);
@@ -35,6 +36,10 @@ function handle_keystroke(){
 
 function handle_player_movement(isUpArrow , isDownArrow , isLeftArrow , isRightArrow,isApressed, isDpressed ){ 
 
+	var tank_rotation = tank_control_config.tank_rotation; // degrees
+	var gun_rotation = tank_control_config.gun_rotation; // degrees
+	var position_offset = tank_control_config.position_offset;
+
 	if( isUpArrow && isDownArrow)
 	{
 		// conflicting keystrokes
@@ -51,19 +56,6 @@ function handle_player_movement(isUpArrow , isDownArrow , isLeftArrow , isRightA
 		isApressed = isDpressed = false ;
 	}
 
-
-	// tank angle update
-	if(isLeftArrow)
-	{
-		t1.set_tank_angle( t1.get_tank_angle() - tank_rotation);
-		t1.set_gun_angle( t1.get_gun_angle() - tank_rotation);
-	}
-	else if(isRightArrow)
-	{
-		t1.set_tank_angle( t1.get_tank_angle() + tank_rotation);
-		t1.set_gun_angle( t1.get_gun_angle() + tank_rotation);
-	}
-
 	// tank position update	
 	if(isUpArrow || isDownArrow)
 	{
@@ -77,13 +69,26 @@ function handle_player_movement(isUpArrow , isDownArrow , isLeftArrow , isRightA
 			new_tank_position.x = tank_position.x + position_offset * Math.cos(tank_angle * Math.PI/180);
 			new_tank_position.y = tank_position.y + position_offset * Math.sin(tank_angle * Math.PI/180);	
 		}
-		else
+		else // isDownArrow
 		{
 			new_tank_position.x = tank_position.x - position_offset * Math.cos(tank_angle * Math.PI/180);
 			new_tank_position.y = tank_position.y - position_offset * Math.sin(tank_angle * Math.PI/180);		
+			tank_rotation = 0 - tank_rotation;
 		}
 
 		t1.set_tank_position(new_tank_position);
+	}
+
+	// tank angle update
+	if(isLeftArrow)
+	{
+		t1.set_tank_angle( t1.get_tank_angle() - tank_rotation);
+		t1.set_gun_angle( t1.get_gun_angle() - tank_rotation);
+	}
+	else if(isRightArrow)
+	{
+		t1.set_tank_angle( t1.get_tank_angle() + tank_rotation);
+		t1.set_gun_angle( t1.get_gun_angle() + tank_rotation);
 	}
 
 	// gun angle updation
