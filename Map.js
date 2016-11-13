@@ -5,8 +5,8 @@ MAP_ELEMENT_CONSTANTS.block = 'block';
 function MapRepresentation(character_representation , width ,height)
 {
 	/*
-		the canvas is broken down into 10*10 pixel blocks ,
-		each of these blocks represent one type of map component
+		The canvas is broken down into 10*10 pixel blocks ,
+		each of these blocks represent one type of map component.
 		blocks can be of type
 
 		1 - blank , 2 - solid block 3 - can add color coding too
@@ -37,7 +37,7 @@ function MapRepresentation(character_representation , width ,height)
 
 	this.width = width;
 	this.height = height;
-	this.map_components = [];
+	this.mapComponents = [];
 
 	if(character_representation.length*10 != this.height)
 	{
@@ -59,13 +59,13 @@ function MapRepresentation(character_representation , width ,height)
 			}
 			else
 			{
-				this.map_components[i] = [];
+				this.mapComponents[i] = [];
 				
 				for(var j = 0 ; j<map_row.length ; j++)
 				{
-					var component = MAP_ELEMENT_CONSTANTS[ this.character_mapping[ map_row[j] ] ];
+					var component = MAP_ELEMENT_CONSTANTS[ this.characterMapping[ map_row[j] ] ];
 					if(component != null)
-						this.map_components[i][j] = component;
+						this.mapComponents[i][j] = component;
 					else
 					{
 						console.log('MapRepresentation : Error : in character_representation : invalid character : i : '+i+ ' , j : '+j);
@@ -77,30 +77,48 @@ function MapRepresentation(character_representation , width ,height)
 	}
 }
 
-MapRepresentation.prototype.character_mapping = {
+// get methods
+MapRepresentation.prototype.getWidth = function(){
+	return this.width;
+}
+MapRepresentation.prototype.getHeight = function(){
+	return this.height;
+}
+MapRepresentation.prototype.getMapComponents = function(){
+	return this.mapComponents;
+}
+
+
+/*
+	global variable used to store mapping between character and type of map block
+*/
+MapRepresentation.prototype.characterMapping = {
 	'b' : MAP_ELEMENT_CONSTANTS.blank,
 	'#' : MAP_ELEMENT_CONSTANTS.block
 };
 
+/*
+	method used to render the components of the Map.
+*/
 MapRepresentation.prototype.render = function() {
 	console.log('MapRepresentation : render');
-	if(this.map_components == null || this.map_components.length == 0)
+	if(this.mapComponents == null || this.mapComponents.length == 0)
 		return;
 	ctx.save();
 	ctx.beginPath();
 	
-	for(var i = 0 ; i<this.map_components.length ; i++)
+	for(var i = 0 ; i<this.mapComponents.length ; i++)
 	{
-		var map_row = this.map_components[i];
+		var map_row = this.mapComponents[i];
 		for(var j = 0 ; j<map_row.length ; j++)
 		{
 			//console.log('inside for loop');
-			var component = this.map_components[i][j];
+			var component = this.mapComponents[i][j];
 			if(component == MAP_ELEMENT_CONSTANTS.block)
 			{
 				ctx.save();
 				ctx.fillStyle = 'black';
-				ctx.fillRect(j*10,i*10,(j*10)+10,(i*10)+10);
+				ctx.fillRect(j*10,i*10,10,10);
 				ctx.restore();
 			}
 			else if (component == MAP_ELEMENT_CONSTANTS.blank)
@@ -113,3 +131,64 @@ MapRepresentation.prototype.render = function() {
 	ctx.restore();
 }
 
+
+MapRepresentation.prototype.checkTankCollision = function(tank_obj){
+	// todo
+	/*
+	 used in collision detection between a Tank and Map.
+
+	 given a tank_obj which contains tank orientation , returns false if the tank_obj does not occupy any of the
+	 map components which is of type 'solid'/ 'block'
+	 returns true  otherwise
+	*/
+}	
+
+MapRepresentation.prototype.pointOfImpact(staring_point , projection_angle)
+{
+	//todo
+	/*
+		used in projection of Bullet(Ray casting).
+		given strating point ,angle of projection(projection_angle) it returns a first point of collision( collision with 
+		block of type 'solid')
+	*/
+}
+
+
+
+
+
+
+// helper function not used as of yet - donot look
+
+/*
+	@param : point = { x: some_number , y : some_number } ,represents a point on canvas.
+	@return : returns a string , which indicates the type of block which enlcoses the point
+*/
+MapRepresentation.prototype.checkBlockForPoint = function(point){
+	
+	// check arguments
+	if(point == null || point.x == null || point.y == null)
+		return null;
+	if(point.x <0 || point.y < 0 || point.x > this.getWidth() || point.y > this.getHeight())
+		return null;
+
+	var x = Math.floor(point.x / 10);
+	var y = Math.floor(point.y / 10);
+	var mapComp = this.getMapComponents();
+	return mapComp[y][x];
+}
+
+MapRepresentation.prototype.checkBlockForLine = function(staring_point , ending_point)
+{
+	// check arguments
+	if(staring_point == null || staring_point.x == null || staring_point.y == null)
+		return null;
+	if(staring_point.x <0 || staring_point.y < 0 || staring_point.x > this.getWidth() || staring_point.y > this.getHeight())
+		return null;
+	if(ending_point == null || ending_point.x == null || ending_point.y == null)
+		return null;
+	if(ending_point.x <0 || ending_point.y < 0 || ending_point.x > this.getWidth() || ending_point.y > this.getHeight())
+		return null;
+
+
+}

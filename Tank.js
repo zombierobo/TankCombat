@@ -161,7 +161,7 @@ Tank.prototype.get_gun_length = function(){
 }
 
 Tank.prototype.get_gun_tip = function(){
-	// used for projecting bullet 
+	// used for getting starting position of bullet helps in (projecting bullet) 
 	// returns a position vector of gun tip of the tank.
 
 	var position_vector = {};
@@ -169,6 +169,15 @@ Tank.prototype.get_gun_tip = function(){
 	position_vector.y = this.get_tank_position().y + this.get_gun_length()*Math.sin(this.get_gun_angle() * Math.PI/180);
 	return position_vector;
 }
+
+Tank.prototype.get_gun_pivot = function(){
+	// used to return pivot point of gun
+	// used in conjunction with gun tip to check collission with other objects
+	// in our tank model , the gun pivot is the centre of the tank
+
+	return this.current_position ;
+}
+
 
 Tank.prototype.render = function(){
 	// renders all the components of the tank with respect to its position and angle.
@@ -251,6 +260,17 @@ Tank.prototype.render = function(){
 
 	ctx.closePath();
 }
+
+Tank.prototype.checkTankCollision = function(tank_obj){
+	//todo
+	/*
+		used in collision detection between this Tank object and an other Tank Object(tank_obj)
+		returns true if both tanks overlap each other in their respective orientation,
+		false otherwise.
+	*/
+}
+
+// the following functions are helper functions to aid rendering of the tank
 
 function RectangularComponent(x_offset , y_offset , width ,length,color){
 	// x_offset x-axis offset from centre of the Tank
