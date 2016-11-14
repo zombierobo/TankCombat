@@ -8,9 +8,9 @@ var frame_rate = 1000/60;
 
 var scale = 0.5;
 
-	var width = 1080;
-	var height = 720;
-	var character_representation = [
+var width = 1080;
+var height = 720;
+var character_representation = [
  "############################################################################################################"
 ,"#bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#"
 ,"#bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb#"
@@ -95,8 +95,6 @@ function gameLoop(){
 	ctx.clearRect(0,0,canvas.width , canvas.height);
 	map_1.render();
 }
-
-
 
 
 /*

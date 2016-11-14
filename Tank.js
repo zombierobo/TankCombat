@@ -188,7 +188,9 @@ Tank.prototype.render = function(){
 	ctx.save();
 
 	ctx.translate(this.current_position.x ,this.current_position.y);
-	ctx.rotate(this.tank_orientation.tank_angle*Math.PI / 180);
+	var rotation_angle = 360 - this.get_tank_angle();
+	
+	ctx.rotate(rotation_angle*Math.PI / 180);
 			
 	for(var i = 0 ; i<this.tank_body_components.length ; i++)
 	{	
@@ -225,7 +227,8 @@ Tank.prototype.render = function(){
 	ctx.save();
 
 	ctx.translate(this.current_position.x ,this.current_position.y);
-	ctx.rotate(this.tank_orientation.gun_angle*Math.PI / 180);
+	rotation_angle = 360 - this.get_gun_angle();
+	ctx.rotate(rotation_angle*Math.PI / 180);
 		
 	for(var i = 0 ; i<this.tank_gun_components.length ; i++)
 	{	
@@ -268,7 +271,120 @@ Tank.prototype.checkTankCollision = function(tank_obj){
 		returns true if both tanks overlap each other in their respective orientation,
 		false otherwise.
 	*/
+	return areTankOverlapping(this , tank_obj);
 }
+
+/*
+	function to check if two tanks overlap with each other.
+	used in collision detection
+
+	return true if they overlap 
+	false otherwise
+*/
+
+function areTankOverlapping(tank_obj_a , tank_obj_b)
+{
+	// check arguments
+	if(tank_obj_a == null || tank_obj_b == null)
+		return false;
+
+	// check if tank body overlap
+
+	var rect_body_a = getTankBodyRect(tank_obj_a);
+	var rect_body_b = getTankBodyRect(tank_obj_b);
+
+	if(areRectangleOverlapping(rect_body_a , rect_body_b))
+	{
+		console.log('areTankOverlapping : tank body - tank body overlapping');
+		return true;
+	}
+	// check if tank guns overlap
+
+	var rect_gun_a = getTankGunRect(tank_obj_a);
+	var rect_gun_b = getTankGunRect(tank_obj_b);
+
+	if(areRectangleOverlapping(rect_gun_a , rect_gun_b))
+	{
+		console.log('areTankOverlapping : gun - gun overlapping');
+		return true;
+	}
+	// check if gun of one tank overlaps body of another
+
+	if(areRectangleOverlapping(rect_gun_a , rect_body_b))
+	{
+		console.log('areTankOverlapping : gun - tank body overlapping');
+		return true;
+	}	
+	if(areRectangleOverlapping(rect_gun_b , rect_body_a))
+	{
+		console.log('areTankOverlapping : tank body - gun overlapping');
+		return true;
+	}
+	return false;       // not overlapping
+}
+
+// helper functions
+
+/*
+	@param : a tank object.
+	@return : a Rectangle object , which represents the rectangle object enclosing Tank Body.
+	used for collision detection purpose.
+*/
+function getTankBodyRect(tank_obj_a)
+{
+	// check arguments
+	if(tank_obj_a == null)
+		return null;
+
+	var tank_length = tank_obj_a.get_tank_length();
+	var tank_width = tank_obj_a.get_tank_width();
+	var position = tank_obj_a.get_tank_position();
+	var tank_angle = tank_obj_a.get_tank_angle();
+
+	var phi = Math.atan2(tank_width , tank_length)*180 / Math.PI;
+
+	var r = Math.sqrt(tank_length/2 *tank_length/2 + tank_width/2 * tank_width/2);
+
+	var pointRT = new Point(position.x + r*Math.cos((phi + tank_angle )*Math.PI/180) , position.y - r*Math.sin((phi + tank_angle) * Math.PI/180));
+	var pointLT	= new Point(position.x + r*Math.cos((180 - phi + tank_angle )*Math.PI/180) , position.y - r* Math.sin((180 - phi + tank_angle)*Math.PI/180));
+	var pointLB = new Point(position.x + r*Math.cos( (180 + phi + tank_angle ) * Math.PI/180) , position.y - r* Math.sin( (180 + phi + tank_angle) * Math.PI/180))
+	var pointRB = new Point(position.x + r*Math.cos( (360 - phi + tank_angle ) * Math.PI/180) , position.y - r* Math.sin( (360 - phi + tank_angle) * Math.PI/180));
+
+	var rect_body_a = new Rectangle(pointLT , pointLB, pointRT , pointRB);
+	//console.log(JSON.stringify(rect_body_a));
+	return rect_body_a;
+}
+
+/*
+	@param : a tank object.
+	@return : a Rectangle object , which represents the rectangle enclosing Tank Gun.
+	used for collision detection purpose.
+*/
+function getTankGunRect(tank_obj_a)
+{
+	//check arguments
+	if(tank_obj_a == null)
+		return null;
+
+	var gun_length = tank_obj_a.get_gun_length();
+	var gun_width = tank_obj_a.get_gun_width();
+	var gun_pivot = tank_obj_a.get_gun_pivot();
+	var gun_angle = tank_obj_a.get_gun_angle();
+
+	var phi = Math.atan2(gun_width/2 , gun_length)*180 / Math.PI;
+
+	var r = Math.sqrt(gun_width/2 * gun_width/2 + gun_length*gun_length);
+
+	var pointLT	= new Point(gun_pivot.x - gun_width/2*Math.sin(gun_angle*Math.PI/180) , gun_pivot.y - gun_width/2*Math.sin((90+gun_angle)*Math.PI/180));
+	var pointLB = new Point(gun_pivot.x + gun_width/2*Math.sin(gun_angle*Math.PI/180) , gun_pivot.y + gun_width/2*Math.sin((90+gun_angle)*Math.PI/180));
+	var pointRT = new Point(gun_pivot.x + r*Math.cos( (gun_angle+phi) * Math.PI/180) , gun_pivot.y - r*Math.sin( (gun_angle+phi) * Math.PI/180));
+	var pointRB = new Point(gun_pivot.x + r*Math.cos( (gun_angle+(360-phi))*Math.PI/180) , gun_pivot.y - r*Math.sin( (gun_angle+(360-phi))*Math.PI/180));
+
+	var rect_gun_a = new Rectangle(pointLT , pointLB, pointRT , pointRB);
+	//console.log(JSON.stringify(rect_gun_a));
+	return rect_gun_a;	
+} 
+
 
 // the following functions are helper functions to aid rendering of the tank
 
