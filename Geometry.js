@@ -104,9 +104,9 @@ function areRectangleOverlapping(rectangle_obj_a ,rectangle_obj_b ){
 	if(rectangle_obj_b.pointRB.y > bottomB)
 		bottomB = rectangle_obj_b.pointRB.y;
 
-	if(leftA >= rightB)
-		return false; // overlapping impossible
-	if(rightA <= leftB)
+	if(leftA > rightB)
+			return false; // overlapping impossible
+	if(rightA < leftB)
 		return false; // overlapping impossible
 	if(topA > bottomB)
 		return false; // overlapping impossible

@@ -1,4 +1,4 @@
-function Tank(width , length , color){
+ function Tank (width , length , color){
 	/*
 	how the tank looks on the canvas 
 
@@ -98,7 +98,6 @@ Tank.prototype.set_tank_position = function( position_vector){
 	this.current_position.y = position_vector.y;
 }
 
-
 Tank.prototype.set_tank_angle = function(angle){
 	if(angle != null)
 	{
@@ -177,7 +176,6 @@ Tank.prototype.get_gun_pivot = function(){
 
 	return this.current_position ;
 }
-
 
 Tank.prototype.render = function(){
 	// renders all the components of the tank with respect to its position and angle.
@@ -282,7 +280,7 @@ Tank.prototype.checkTankCollision = function(tank_obj){
 	false otherwise
 */
 
-function areTankOverlapping(tank_obj_a , tank_obj_b)
+function areTankOverlapping (tank_obj_a , tank_obj_b)
 {
 	// check arguments
 	if(tank_obj_a == null || tank_obj_b == null)
@@ -330,7 +328,7 @@ function areTankOverlapping(tank_obj_a , tank_obj_b)
 	@return : a Rectangle object , which represents the rectangle object enclosing Tank Body.
 	used for collision detection purpose.
 */
-function getTankBodyRect(tank_obj_a)
+function getTankBodyRect (tank_obj_a)
 {
 	// check arguments
 	if(tank_obj_a == null)
@@ -360,7 +358,7 @@ function getTankBodyRect(tank_obj_a)
 	@return : a Rectangle object , which represents the rectangle enclosing Tank Gun.
 	used for collision detection purpose.
 */
-function getTankGunRect(tank_obj_a)
+function getTankGunRect (tank_obj_a)
 {
 	//check arguments
 	if(tank_obj_a == null)
@@ -388,7 +386,7 @@ function getTankGunRect(tank_obj_a)
 
 // the following functions are helper functions to aid rendering of the tank
 
-function RectangularComponent(x_offset , y_offset , width ,length,color){
+function RectangularComponent (x_offset , y_offset , width ,length,color){
 	// x_offset x-axis offset from centre of the Tank
 	// y_offset y-axis offset from centre of the Tank
 
@@ -399,7 +397,7 @@ function RectangularComponent(x_offset , y_offset , width ,length,color){
 	this.color = color;
 }
 
-function CircularComponent(x_offset , y_offset , radius,color){
+function CircularComponent (x_offset , y_offset , radius,color){
 	// x_offset x-axis offset from centre of the Tank
 	// y_offset y-axis offset from centre of the Tank
 
@@ -407,4 +405,4 @@ function CircularComponent(x_offset , y_offset , radius,color){
 	this.y_offset = y_offset;
 	this.radius = radius;
 	this.color = color;
-}
+};
