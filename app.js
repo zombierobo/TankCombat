@@ -1,7 +1,8 @@
 require('./lib_common.js');
-require('./lib_Geometry.js');
-require('./lib_Tank.js');   
-require('./lib_Game.js');
+
+Game = require('./lib_Game.js').Game;
+Player = require('./lib_Player.js');
+Tank = require('./lib_Tank.js').Tank;
 
 var gameport = 3000;
 var io = require('socket.io');

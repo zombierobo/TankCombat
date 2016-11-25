@@ -1,3 +1,8 @@
+///////////////////////////////////////////////
+//######### update the code and use #########//
+///////////////////////////////////////////////
+
+
 var MAP_ELEMENT_CONSTANTS = {};
 MAP_ELEMENT_CONSTANTS.blank = 'blank';
 MAP_ELEMENT_CONSTANTS.block = 'block';

@@ -1,3 +1,8 @@
+///////////////////////////////////////////////
+//######### update the code and use #########//
+///////////////////////////////////////////////
+
+
  function Tank (width , length , color){
 	/*
 	how the tank looks on the canvas 

@@ -1,3 +1,8 @@
+///////////////////////////////////////////////
+//######### update the code and use #########//
+///////////////////////////////////////////////
+
+
 function Game(game_id , map_id , max_players , max_game_time,tank_model)
 {
   this.id = game_id;
