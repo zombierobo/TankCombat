@@ -61,7 +61,7 @@ function handle_keystroke(){
 	
 	send_command_to_server(commandSet);
 	
-	var dummy_tank = handle_player_movement(t1,commandSet);
+	var dummy_tank = handle_tank_movement(t1,commandSet);
 
 	if(areTankOverlapping(dummy_tank , t2))
 	{
@@ -79,7 +79,7 @@ function send_command_to_server(commandSet) {
 	socket.emit('in-game' , message);
 }
 
-function handle_player_movement(t1 ,commandSet){ 
+function handle_tank_movement(t1 ,commandSet){ 
 
 	var tank_rotation = tank_control_config.tank_rotation; // degrees
 	var gun_rotation = tank_control_config.gun_rotation; // degrees

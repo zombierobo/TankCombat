@@ -4,6 +4,8 @@ Game = require('./lib_Game.js').Game;
 Player = require('./lib_Player.js');
 Tank = require('./lib_Tank.js').Tank;
 
+//###################################################### Express Server setup #####################################################
+
 var gameport = 3000;
 var io = require('socket.io');
 var express= require('express');
@@ -51,7 +53,7 @@ app.get( '/*' , function( req, res, next ) {
 }); //app.get *
 
 
-/*######################################## end of express server##########################################################*/
+//##################################################################################################################################
 
 /*
   Game object   - {game_id , map_id, max_players, max_game_time,game_state};
@@ -116,11 +118,12 @@ io.on('connection', function(socket){
       game_obj.removePlayer(user_id);
       if(game_obj.getPlayerCount() == 0)
       {
-        game_obj.stopGame();
-        delete games_set[game_id];
+        if(game_obj.stopGame());
+          delete games_set[game_id];
+        log('socket::disconnect' , 'stopping game , game_id : '+game_id);
       }
     }
-    log('Games set',JSON.stringify(games_set));
+    log('Games set',games_set);
   });
 });
 
@@ -154,6 +157,8 @@ function handle_client_message(socket , channel , message){
       log('Unrecognized Channel' , 'Message :'+message);
     }
 }
+
+//############################################# App(in_app) channel handlers ###########################################################
 
 function handle_app_channel(socket,user_id,components){
   // type of messages 1-'get-games-list' 2-'join-game' 3-'create-new-game'
@@ -219,6 +224,29 @@ function handle_app_channel(socket,user_id,components){
   }
 }
 
+function emit_games_list(socket,channel,games_set) {
+  var games_list = {}
+  for(var game_id in games_set)
+  {
+    var game_obj = games_set[game_id];
+    var game_state = {}
+    game_state.id = game_obj.getId();
+    game_state.map_id = game_obj.getMapId();
+    game_state.max_players = game_obj.getMaxPlayers();
+    game_state.max_game_time = game_obj.getMaxGameTime();
+    game_state.player_count = game_obj.getPlayerCount();
+    game_state.state = game_obj.getState();
+    games_list[game_id] = game_state;
+  }
+
+  var message = 'list-of-games'+'$'+JSON.stringify(games_list);
+  emit_message_to_client(socket,channel,message);
+}
+
+//#######################################################################################################################################
+
+//############################################# Lobby(in_lobby) channel handlers ###########################################################
+
 function handle_lobby_channel(socket,user_id,components){
 
     // type of messages 1- 'get-lobby-state' 2-'change-color' , 3-'change-state'( to 'ready' , 'not-ready')
@@ -242,8 +270,21 @@ function handle_lobby_channel(socket,user_id,components){
     if(components[2] == 'get-lobby-state')
     {
       // lobby state consists of list of (player , nickname ,color ,ready/not-ready)
-      var player_set = game_obj.getPlayerSet();
-      emit_lobby_list(socket,in_lobby,game_id,player_set)
+      if(game_obj.getState() == 'in-lobby')
+      {  
+        var player_set = game_obj.getPlayerSet();
+        emit_lobby_list(socket,in_lobby,game_id,player_set)
+      }
+      else if(game_obj.getState() == 'game-started')
+      {
+        var message = 'game-started' + '$' + game_id;
+        emit_message_to_client(socket,in_lobby,message);
+      }
+      else if(game_obj.getState() == 'game-terminated')
+      {
+        var message = 'game-terminated' + '$' + game_id;
+        emit_message_to_client(socket,in_lobby,message); 
+      }
     }
     else if(components[2] == 'change-nickname')
     {
@@ -290,7 +331,7 @@ function handle_lobby_channel(socket,user_id,components){
         log('handle_lobby_channel::change-lobby-state' , 'error occured while changing lobby state of player : '+user_id);
       }
     }
-    else if(components[2] == 'leave-game')
+    else if(components[2] == 'leave-game-lobby')
     {
       try
       {
@@ -298,7 +339,7 @@ function handle_lobby_channel(socket,user_id,components){
       }
       catch(err)
       {
-        log('handle_lobby_channel::leave-game','error while removing a player from lobby');
+        log('handle_lobby_channel::leave-game-lobby','error while removing a player from lobby');
       }
     }
     else if(components[2] == 'start-game')
@@ -325,36 +366,6 @@ function handle_lobby_channel(socket,user_id,components){
     } 
 }
 
-function handle_game_channel(socket,user_id,components){
-  var game_id = components[1];
-  if(games_set[game_id] == null)
-  {
-    // game with game_id does not exist.
-    var message = 'game-does-not-exist';
-    emit_message_to_client(socket, in_game, message);
-    return ; 
-  }
-}
-
-function emit_games_list(socket,channel,games_set) {
-  var games_list = {}
-  for(var game_id in games_set)
-  {
-    var game_obj = games_set[game_id];
-    var game_state = {}
-    game_state.id = game_obj.getId();
-    game_state.map_id = game_obj.getMapId();
-    game_state.max_players = game_obj.getMaxPlayers();
-    game_state.max_game_time = game_obj.getMaxGameTime();
-    game_state.player_count = game_obj.getPlayerCount();
-    game_state.state = game_obj.getState();
-    games_list[game_id] = game_state;
-  }
-
-  var message = 'list-of-games'+'$'+JSON.stringify(games_list);
-  emit_message_to_client(socket,channel,message);
-}
-
 function emit_lobby_list(socket,channel,game_id,player_set){
   var lobby_set = {};
   for(var player_id in player_set)
@@ -372,8 +383,79 @@ function emit_lobby_list(socket,channel,game_id,player_set){
   emit_message_to_client(socket,channel,message);
 }
 
+//#######################################################################################################################################
+
+//############################################# Game(in_game) channel handlers ###########################################################
+
+function handle_game_channel(socket,user_id,components){
+  log('handle_game_channel' , ' user_id : ' +user_id + ' ,components : '+components);
+    
+  var game_id = components[1];
+
+  //check if game exists.
+  if(games_set[game_id] == null)
+  {
+    // game with game_id does not exist.
+    var message = 'game-does-not-exist';
+    emit_message_to_client(socket, in_game, message);
+    log('handle_game_channel::game-does-not-exist' , ' game_id : ' +game_id);
+    return ; 
+  }
+
+  var game_obj = games_set[game_id];
+
+  // check if the player is in this game.
+  if(game_obj.getPlayer(user_id) == null)
+  {
+    // player with user_id does not exits.
+    //var message = 'user-does-not-exist';
+    //emit_message_to_client(socket, in_game, message);
+    log('handle_game_channel::user-does-not-exist' , ' user_id : ' +user_id); 
+    return ;   
+  }
+
+  if(components[2] == 'client-command')
+  {
+    var update = JSON.parse(components[3]);
+    if(update == null)
+    {
+      log('handle_game_channel::client-command' , 'update from client : '+user_id + ' , update : is null');
+      return;
+    }
+    log('handle_game_channel::client-command' , 'update from client : '+user_id + ' , update : '+JSON.stringify(update));
+    
+    game_obj.addClientUpdate(user_id,update.commandSet , update.command_no , update.time_stamp);
+  }
+  else if(components[2] == 'get-game-state')
+  {
+    var game_state = game_obj.getPlayerSet();
+    emit_game_state(socket,game_state);
+  }
+  else if(components[2] == 'leave-game')
+  {
+    try
+    {
+      game_obj.removePlayer(user_id);
+    }
+    catch(err)
+    {
+      log('handle_game_channel::leave-game','error while removing a player from the game');
+    }
+  }
+}
+
+function emit_game_state(socket,game_state){
+  var message = 'game-state' + '$' + JSON.stringify(game_state);
+  emit_message_to_client(socket,in_game,message);
+}
+
+//#######################################################################################################################################
+
+//############################################ Helper functions ###############################################################
+
 function emit_message_to_client(socket,channel ,message){
   log('emit_message_to_client','client id : ' + socket.id +' , channel : '+channel +' , message : '+message);
   socket.emit(channel , message);
 }
 
+//#############################################################################################################################
