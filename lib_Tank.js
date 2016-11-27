@@ -103,6 +103,9 @@ Tank.Tank.prototype.set_tank_position = function( position_vector){
 	this.current_position.y = position_vector.y;
 }
 
+Tank.Tank.prototype.set_tank_orientation = function( new_tank_orientation){
+	this.tank_orientation = new_tank_orientation;
+}
 
 Tank.Tank.prototype.set_tank_angle = function(angle){
 	if(angle != null)
@@ -139,6 +142,10 @@ Tank.Tank.prototype.set_tank_color = function(color){
 
 Tank.Tank.prototype.get_tank_position = function(){
 	return this.current_position; // returns a position vector.
+}
+
+Tank.Tank.prototype.get_tank_orientation = function(){
+	return this.tank_orientation; 
 }
 
 Tank.Tank.prototype.get_tank_angle = function(){

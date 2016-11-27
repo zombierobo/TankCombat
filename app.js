@@ -59,6 +59,9 @@ app.get( '/*' , function( req, res, next ) {
   Game object   - {game_id , map_id, max_players, max_game_time,game_state};
   Player object - {player_id, nick_name , lobby_state};
 */
+
+var logEnable = false;
+
 // Global list of Users
 var users_set = {};
 
@@ -428,8 +431,24 @@ function handle_game_channel(socket,user_id,components){
   }
   else if(components[2] == 'get-game-state')
   {
-    var game_state = game_obj.getPlayerSet();
-    emit_game_state(socket,game_state);
+    var player_set = game_obj.getPlayerSet();
+    var game_state = {};
+    for(var player_id in player_set)
+    {
+      var player_obj = player_set[player_id];
+
+      var player_state = {};
+      player_state.id = player_obj.getId();
+      player_state.nickname = player_obj.getNickname();
+      player_state.health = player_obj.getHealth();
+      player_state.preferred_color = player_obj.getColor();
+      player_state.tank_properties = {};
+      player_state.tank_properties.current_position = player_obj.getTank().get_tank_position();
+      player_state.tank_properties.tank_orientation = player_obj.getTank().get_tank_orientation();
+
+      game_state[player_id] = player_state;
+    }
+    emit_game_state(socket,game_id,game_state);
   }
   else if(components[2] == 'leave-game')
   {
@@ -444,8 +463,8 @@ function handle_game_channel(socket,user_id,components){
   }
 }
 
-function emit_game_state(socket,game_state){
-  var message = 'game-state' + '$' + JSON.stringify(game_state);
+function emit_game_state(socket,game_id,game_state){
+  var message = game_id + '$' + 'game-state' + '$' + JSON.stringify(game_state);
   emit_message_to_client(socket,in_game,message);
 }
 
@@ -456,6 +475,16 @@ function emit_game_state(socket,game_state){
 function emit_message_to_client(socket,channel ,message){
   log('emit_message_to_client','client id : ' + socket.id +' , channel : '+channel +' , message : '+message);
   socket.emit(channel , message);
+}
+
+function log(header, message){
+  if(!logEnable)
+    return;
+
+  console.log('-----------------------# ' + header + ' #---------------------------------');
+  console.log(message);
+  console.log('-----------------------------------------------------------------------------'); 
+  console.log('');
 }
 
 //#############################################################################################################################

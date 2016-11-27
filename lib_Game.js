@@ -1,4 +1,5 @@
 // import dependencies
+require('./lib_common.js');
 Tank = require('./lib_Tank.js').Tank;
 areTankOverlapping = require('./lib_Tank.js').areTankOverlapping;
 
@@ -128,14 +129,15 @@ Game.Game.prototype.processClientUpdates = function(){
     // the commands sent by clients are applied on server game state and Acknowlegement is sent.
     
     // todo - 1. collision detection between tanks.
-    log('processClientUpdates','client_update_buffer : '+this.client_update_buffer);
 
-    if(this.client_update_buffer == null )
+    if(this.client_update_buffer == null || this.client_update_buffer.length == 0)
       return;
 
-    for(var i = 0 ; i < this.client_update_buffer ; i++)
+    log('processClientUpdates','client_update_buffer : '+JSON.stringify(this.client_update_buffer));
+    
+    for(var i = 0 ; i < this.client_update_buffer.length ; i++)
     {
-      var update = client_update_buffer[i];
+      var update = this.client_update_buffer[i];
       log('processClientUpdates' , 'update : '+update);
 
       var user_id = update.user_id;
@@ -143,16 +145,21 @@ Game.Game.prototype.processClientUpdates = function(){
 
       var tank_obj = this.getPlayer(user_id).getTank();
 
-      var dummy_tank = this.handle_tank_movement(tank_obj,commandSet);
-      
+      var dummy_tank = this.handle_tank_movement(tank_obj,null,null,commandSet);
+  
+
+      log('processClientUpdates','dummy_tank : '+JSON.stringify(dummy_tank));
+
       tank_obj.set_tank_position(dummy_tank.get_tank_position());
       tank_obj.set_tank_angle(dummy_tank.get_tank_angle());
       tank_obj.set_gun_angle(dummy_tank.get_gun_angle());
+
     }
 
     // empty the buffer
 
     this.client_update_buffer = [];
+    log('latest games state',JSON.stringify(this.getPlayerSet()));
 }
 
 Game.Game.prototype.game_loop = function(){
@@ -170,18 +177,11 @@ this.Game.prototype.get_score_sheet = function(){
 }
 */
 
-Game.Game.prototype.tank_control_config = {
-  tank_rotation : 1, // degrees
-  gun_rotation : 2, // degrees 
-  position_offset : 1 // pixels on the canvas  
-};
+Game.Game.prototype.handle_tank_movement = function(tank_obj , tank_list , Map_obj ,commandSet){
 
-
-Game.Game.prototype.handle_tank_movement = function(tank_obj ,commandSet){
-
-  var tank_rotation = this.tank_control_config.tank_rotation; // degrees
-  var gun_rotation = this.tank_control_config.gun_rotation; // degrees
-  var position_offset = this.tank_control_config.position_offset;
+  var tank_rotation = tank_control_config.tank_rotation; // degrees
+  var gun_rotation = tank_control_config.gun_rotation; // degrees
+  var position_offset = tank_control_config.position_offset;
 
   if( commandSet.isUpArrow && commandSet.isDownArrow)
   {
@@ -243,6 +243,7 @@ Game.Game.prototype.handle_tank_movement = function(tank_obj ,commandSet){
   else if(commandSet.isDpressed)
     new_gun_angle -= gun_rotation;
 
+  var dummy_tank = new Tank(tank_model_settings.width , tank_model_settings.length,'blue');
 
   dummy_tank.set_tank_position(new_tank_position);
   dummy_tank.set_tank_angle(new_tank_angle);

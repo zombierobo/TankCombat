@@ -8,6 +8,8 @@ Global.user_id;
 Global.game_id;
 Global.nick_name = 'zombie';
 
+Global.logEnable = false;
+
 socket = io();
 
 socket.on('connect',init);
@@ -31,7 +33,7 @@ function init(){
 	});
 
 	socket.on('disconnect' , function(){
-		console.log('disconnectted from server');
+		//console.log('disconnectted from server');
 	});
 
 	// create a random game;
@@ -280,30 +282,42 @@ function start_game(user_id , game_id){
 //############################################## Game(in_game) Action and Event handlers ############################################
 
 Global.game_interval;
-Global.client_frame_rate = 1000/1;
+Global.client_frame_rate = 1000/30;
+
 Global.canvas = document.getElementById('myCanvas');
 Global.ctx = Global.canvas.getContext('2d');
+
 Global.keyboard = new KeyboardState();
-Global.player_set;
+Global.game_state = {};
+
 
 function handle_game_channel(socket,components){
-	if(components[0] == 'game-state')
+	var game_id = components[0];
+	if(game_id == null || game_id != Global.game_id)
+	{
+		log('handle_game_channel' , 'unrecognized game , game_id : '+game_id );
+		return false;
+	}
+
+	if(components[1] == 'game-state')
 	{
 		// update from server about game state.
-		Global.player_set = JSON.parse(components[1]);
-		if(Global.player_set == null)
+		var player_set = JSON.parse(components[2]);
+		if(player_set == null)
 		{
 			log('handle_game_channel::game-state', 'player_set is null');
-			return;
+			return false;
 		}
 		else
-			log('handle_game_channel::game-state' , 'player_set : '+JSON.stringify(Global.player_set));
+			log('handle_game_channel::game-state' , 'player_set : '+JSON.stringify(Global.game_state.player_set));
+		
+		Global.game_state.player_set = player_set;
 	}
 }
 
 function main_game_loop(){
 	refresh_game_state();
-	handle_key_stroke()
+	handle_key_stroke();
 	clear_canvas();
 	render_game();
 }
@@ -311,7 +325,7 @@ function main_game_loop(){
 function handle_key_stroke(){
 	//if(Global.player_set == null)
 	//	return false;
-
+	//console.log('handle_key_stroke');
 	
 	var keyboard = Global.keyboard;
 
@@ -329,8 +343,7 @@ function handle_key_stroke(){
 	var command_no = 5;
 	var time_stamp = 12111;
 
-	send_update_to_server(Global.user_id , Global.game_id , commandSet . command_no , time_stamp);
-	
+	var ms = send_update_to_server(Global.user_id , Global.game_id , commandSet , command_no , time_stamp);
 	/*
 	var dummy_tank = handle_tank_movement(t1,commandSet);
 
@@ -422,6 +435,7 @@ function handle_tank_movement(tank_obj ,commandSet){
 
 
 function send_update_to_server(user_id ,game_id,commandSet,command_no,time_stamp){
+	//console.log('send_update_to_server')
 	if(user_id == null || game_id == null || commandSet == null )
 		return false;
 
@@ -448,8 +462,32 @@ function clear_canvas(){
 }
 
 function render_game(){
-	return;
-	//todo
+	//console.log('render_game called');
+	
+	if(Global.game_state.player_set == null)
+	{
+		log('render_game' , 'game_state is not defined');
+		return false;
+	}	
+
+	var tank_obj_list = [];	
+	var player_set = Global.game_state.player_set;
+	if(player_set == null )
+		return false;
+
+	for(var player_id in player_set)
+	{
+		var player_obj = player_set[player_id];
+		var tank_obj = new Tank(tank_model_settings.width , tank_model_settings.length , player_obj.preferred_color);
+		tank_obj.set_tank_position(player_obj.tank_properties.current_position);
+		tank_obj.set_tank_orientation(player_obj.tank_properties.tank_orientation);
+		tank_obj.render(Global.ctx);
+
+		tank_obj_list[tank_obj_list] = tank_obj;
+	}
+
+
+	return true;
 }
 
 //######################################################################################################################################
@@ -509,4 +547,12 @@ function emit_message_to_server(socket,channel,message){
 	socket.emit(channel,message);
 }
 
+function log(header, message){
+	if(Global.logEnable == false)
+		return;
+	console.log('-----------------------# ' + header + ' #---------------------------------');
+	console.log(message);
+	console.log('-----------------------------------------------------------------------------'); 
+	console.log('');
+}
 //#######################################################################################################################################

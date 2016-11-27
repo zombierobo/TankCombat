@@ -103,6 +103,10 @@ Tank.prototype.set_tank_position = function( position_vector){
 	this.current_position.y = position_vector.y;
 }
 
+Tank.prototype.set_tank_orientation = function( new_tank_orientation){
+	this.tank_orientation = new_tank_orientation;
+}
+
 Tank.prototype.set_tank_angle = function(angle){
 	if(angle != null)
 	{
@@ -138,6 +142,10 @@ Tank.prototype.set_tank_color = function(color){
 
 Tank.prototype.get_tank_position = function(){
 	return this.current_position; // returns a position vector.
+}
+
+Tank.prototype.get_tank_orientation = function(){
+	return this.tank_orientation; 
 }
 
 Tank.prototype.get_tank_angle = function(){
@@ -182,9 +190,9 @@ Tank.prototype.get_gun_pivot = function(){
 	return this.current_position ;
 }
 
-Tank.prototype.render = function(){
+Tank.prototype.render = function(ctx){
 	// renders all the components of the tank with respect to its position and angle.
-
+	// on the given canvas context (ctx).
 	// first render Tank Body Components
 	ctx.beginPath();
 
