@@ -3,41 +3,62 @@
 <head>
 	<title>tank combat</title>
 	<style type="text/css">
-		#myCanvas {
+		#myCanvas{
 			margin : 10px;
 			border : solid 1px;
 		}
-		#in-app {
-			display: none;
+		#in-app{
+			display: block;
 		}
 		#in-lobby{
+			display: none;
+		}
+		#in-game{
 			display: none;
 		}
 	</style>
 </head>
 <body>
-	<div id="in-app" >
-		<h1>TankCombat</h1>
-		<ul id="list-of-games">
-			
-		</ul>
-		<h2>Create game</h2>
-		<form action="create_new_game()">
-			map : <select></select>			
-			maximum player : <input type="text" name="max_players">
-			game time : <input type="number" name="game_time">
-		</form>
+	<div id='game'>
+		<div style="float : right;">
+			<span id="app-state" style="font-weight : bold;"></span>
+		</div>
+		<div id="in_app" >
+			<h1>TankCombat (in app)</h1>
+			<ul id="list-of-games">
+					
+			</ul>
+			<h2>Create game</h2>
+			<form action="create_new_game()">
+				map id : <input type="number" name="map_id">			
+				maximum player : <input type="text" name="max_players">
+				game time : <input type="number" name="game_time">
+			</form>
+		</div>
+		
+		<div id="in_lobby">
+			<h1>Game lobby</h1>
+			<ul id="lobby-of-players">
+				
+			</ul>
+		</div>
+
+		<div id="in_game" >
+			<h1>in game</h1>
+			<canvas id = "myCanvas" width="1080" height="720"></canvas>
+		</div>
 	</div>
-	<div id="in-lobby">
-		<h1>Game lobby</h1>
-	</div>
-	<div id="in-game" >
-		<canvas id = "myCanvas" width="720" height="560"></canvas>
-	</div>
+		
 	<script type="text/javascript" src="lib/jquery-3.1.0.min.js"></script>
+	<script type="text/javascript" src="lib/keyboard.js"></script>
 	<script type="text/javascript" src="lib_common.js"></script>
 	<script type="text/javascript" src="Tank.js"></script>
-	<script type="text/javascript" src="lib/keyboard.js"></script>
+	<!--
+	<script type="text/javascript" src="lib_Geometry.js"></script>
+	<script type="text/javascript" src="lib_Tank.js"></script>
+	<script type="text/javascript" src="lib_Game.js"></script>
+	-->
+
 	<script type="text/javascript" src="Geometry.js"></script>
 	<script type="text/javascript" src="/socket.io/socket.io.js"></script>
 	<script type="text/javascript" src="client.js"></script>

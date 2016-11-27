@@ -1,9 +1,4 @@
-///////////////////////////////////////////////
-//######### update the code and use #########//
-///////////////////////////////////////////////
-
-
-function Point(x , y)
+Point = function(x , y)
 {
 	if(x == null || y == null)
 	{
@@ -14,7 +9,7 @@ function Point(x , y)
 	this.y = y;
 }
 
-function Rectangle(pointLT , pointLB ,pointRT, pointRB)
+Rectangle = function(pointLT , pointLB ,pointRT, pointRB)
 {
 	// check arguments
 	if(pointLT == null ||  pointLB == null || pointRT == null || pointRB == null)
@@ -29,7 +24,7 @@ function Rectangle(pointLT , pointLB ,pointRT, pointRB)
 	this.pointRB = pointRB;
 }
 
-function areRectangleOverlapping(rectangle_obj_a ,rectangle_obj_b ){	
+areRectangleOverlapping = function(rectangle_obj_a ,rectangle_obj_b ){
 	//console.log('areRectangleOverlapping : '+JSON.stringify(rectangle_obj_a) + ' : '+JSON.stringify(rectangle_obj_b));
 	if(rectangle_obj_a == null || rectangle_obj_b == null)
 	{
@@ -110,7 +105,7 @@ function areRectangleOverlapping(rectangle_obj_a ,rectangle_obj_b ){
 		bottomB = rectangle_obj_b.pointRB.y;
 
 	if(leftA > rightB)
-			return false; // overlapping impossible
+		return false; // overlapping impossible
 	if(rightA < leftB)
 		return false; // overlapping impossible
 	if(topA > bottomB)

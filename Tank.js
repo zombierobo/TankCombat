@@ -1,5 +1,3 @@
-
-
 function Tank(width , length , color){
 	/*
 	how the tank looks on the canvas 
@@ -174,7 +172,7 @@ Tank.prototype.get_gun_tip = function(){
 
 	var position_vector = {};
 	position_vector.x = this.get_tank_position().x + this.get_gun_length()*Math.cos(this.get_gun_angle() * Math.PI/180);
-	position_vector.y = this.get_tank_position().y + this.get_gun_length()*Math.sin(this.get_gun_angle() * Math.PI/180);
+	position_vector.y = this.get_tank_position().y - this.get_gun_length()*Math.sin(this.get_gun_angle() * Math.PI/180);
 	return position_vector;
 }
 
@@ -470,6 +468,8 @@ function CircularComponent (x_offset , y_offset , radius,color){
 }
 
 function Bullet(width , length , color , current_position , projection_angle){
+	//console.log('bullet constructor : '+JSON.stringify(current_position)+ JSON.stringify(projection_angle));
+	
 	this.width = width;
 	this.length = length;
 	this.color = color

@@ -4,6 +4,7 @@ Rectangle = Geometry.Rectangle;
 areRectangleOverlapping = Geometry.areRectangleOverlapping;
 
 var Tank = module.exports;
+
 Tank.Tank = function (width , length , color){
 	/*
 	how the tank looks on the canvas 
@@ -328,8 +329,7 @@ Tank.Tank.prototype.getTankGunRect = function(){
 	return rect_gun_a;	
 } 
 
-Tank.areTankOverlapping = function(tank_obj_a , tank_obj_b)
-{
+Tank.areTankOverlapping = function(tank_obj_a , tank_obj_b){
 	/*
 		function to check if two tanks overlap with each other.
 		used in collision detection
@@ -378,7 +378,8 @@ Tank.areTankOverlapping = function(tank_obj_a , tank_obj_b)
 }
 
 Tank.Bullet = function (width , length , color , current_position , projection_angle){
-	console.log('bullet constructor : '+JSON.stringify(current_position)+ JSON.stringify(projection_angle));
+	//console.log('bullet constructor : '+JSON.stringify(current_position)+ JSON.stringify(projection_angle));
+	
 	this.width = width;
 	this.length = length;
 	this.color = color
@@ -447,9 +448,7 @@ Tank.Bullet.prototype.render = function(ctx){
 
 	ctx.closePath();
 	ctx.restore();
-
 }
-
 
 var RectangularComponent = function(x_offset , y_offset , width ,length,color){
 	// x_offset x-axis offset from centre of the Tank
@@ -471,4 +470,3 @@ var CircularComponent = function(x_offset , y_offset , radius,color){
 	this.radius = radius;
 	this.color = color;
 };
-

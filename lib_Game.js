@@ -5,15 +5,14 @@ areTankOverlapping = require('./lib_Tank.js').areTankOverlapping;
 
 var Game = {}// = module.exports;
 
-Game.Game = function(game_id , map_id , max_players , max_game_time,tank_model)
-{
+Game.Game = function(game_id , map_id , max_players , max_game_time,tank_model){
   this.id = game_id;
   this.map_id = map_id;
   this.max_players = max_players;
   this.max_game_time = max_game_time;
   this.tank_model = tank_model;
 
-  this.server_frame_rate = 1000/30; // 30 fps
+  this.server_frame_rate = 1000/frame_rate_settings.server_fps; // 30 fps
   
   this.state = 'in-lobby';   // possible values - 'in-lobby' , 'game-started' ,'game-terminated' 
 
@@ -63,8 +62,6 @@ Game.Game.prototype.addPlayer = function(user_id,nick_name){
 Game.Game.prototype.removePlayer = function(user_id){
     // remove from player_set
     delete this.player_set[user_id];
-    // remove from score_sheet
-    // TODO
     return true;
 }
 
@@ -153,20 +150,21 @@ Game.Game.prototype.processClientUpdates = function(){
       var tank_obj = this.getPlayer(user_id).getTank();
       if(tank_obj != null)
       {
-
         var dummy_tank = this.handle_tank_movement(tank_obj,null,null,commandSet);
     
         log('processClientUpdates','dummy_tank : '+JSON.stringify(dummy_tank));
+        if(dummy_tank != null)
+        {
+          tank_obj.set_tank_position(dummy_tank.get_tank_position());
+          tank_obj.set_tank_angle(dummy_tank.get_tank_angle());
+          tank_obj.set_gun_angle(dummy_tank.get_gun_angle());
+        }
 
-        tank_obj.set_tank_position(dummy_tank.get_tank_position());
-        tank_obj.set_tank_angle(dummy_tank.get_tank_angle());
-        tank_obj.set_gun_angle(dummy_tank.get_gun_angle());
-      
         // handle fire command
         if(commandSet.isSpacePressed)
         {
           // check if this user_id has a bullet in game.
-          if(this.getBulletSet().user_id ==null)
+          if(this.bullet_set[user_id] == null)
           {
             var gun_angle = tank_obj.get_gun_angle();
             var position = tank_obj.get_gun_tip();
@@ -179,7 +177,7 @@ Game.Game.prototype.processClientUpdates = function(){
             var bullet_obj = new Bullet(bullet_model_settings.width , bullet_model_settings.length , bullet_model_settings.color , bullet_position , gun_angle);
 
             // bullet added to bullet set , the source of the bullet is user_id.
-            this.getBulletSet().user_id = bullet_obj;
+            this.bullet_set[user_id] = bullet_obj;
 
             log('BULLET FIRE COMMAND HANDLE','user_id : '+user_id + ' , gun tip : '+ JSON.stringify(position) + ' , gun_angle : ' + gun_angle + ' , bullet obj : '+JSON.stringify(bullet_obj));
           }
@@ -189,7 +187,6 @@ Game.Game.prototype.processClientUpdates = function(){
     }
 
     // empty the buffer
-
     this.client_update_buffer = [];
     log('latest games state',JSON.stringify(this.getPlayerSet()));
 }
@@ -207,7 +204,8 @@ Game.Game.prototype.processBulletPosition = function(){
     if(current_position.x < 0 || current_position.x > 1000 || current_position.y < 0 || current_position.y > 1000)
     {
       // bullet out of boundary
-      continue;
+      log('BULLET DELETE EVENT ' ,'bullet_obj : '+JSON.stringify(bullet_obj))
+      delete bullet_set[user_id];
     }
     else
     {
@@ -223,19 +221,6 @@ Game.Game.prototype.processBulletPosition = function(){
       log('AFTER BULLET UPDATE','bullet_obj : '+JSON.stringify(bullet_obj));
     }
   }
-
-  for(var user_id in bullet_set)
-  {
-    var bullet_obj = bullet_set[user_id];
-    var current_position = bullet_obj.get_bullet_position();
-    
-    if(current_position.x < 0 || current_position.x > 1000 || current_position.y < 0 || current_position.y > 1000)
-    {
-      // bullet out of boundary
-      log('BULLET DELETE EVENT ' ,'bullet_obj : '+JSON.stringify(bullet_obj))
-      delete bullet_set[user_id];
-    }
-  }
 }
 
 Game.Game.prototype.game_loop = function(){
@@ -243,18 +228,24 @@ Game.Game.prototype.game_loop = function(){
     this.processBulletPosition();
 }
 
-// scoresheets not implemented as of now.
-/*
-this.Game.prototype.update_score_sheet = function(){
-  
-}
-
-this.Game.prototype.get_score_sheet = function(){
-  
-}
-*/
-
 Game.Game.prototype.handle_tank_movement = function(tank_obj , tank_list , Map_obj ,commandSet){
+
+  if(tank_obj == null || commandSet == null )
+    return tank_obj;
+
+  var command_for_move = false;
+
+  for(var command in commandSet)
+  {
+    if(commandSet[command])
+    {
+      command_for_move = true;
+      break;
+    }
+  }
+
+  if(!command_for_move)
+    return tank_obj;    // no movement at all.
 
   var tank_rotation = tank_control_config.tank_rotation; // degrees
   var gun_rotation = tank_control_config.gun_rotation; // degrees
@@ -329,15 +320,9 @@ Game.Game.prototype.handle_tank_movement = function(tank_obj , tank_list , Map_o
   return dummy_tank;
 }
 
-
 Game.Game.prototype.handle_bullet_collision = function(){
-
 }
           
-Game.Game.prototype.emit_game_state = function(){
-
-}
-
 module.exports = Game;
 
 // helper function

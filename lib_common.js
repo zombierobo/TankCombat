@@ -8,15 +8,19 @@
 
 	this.logEnable = false;
 
+	this.frame_rate_settings = {
+		server_fps : 60,
+		client_fps : 60
+	} 
 	this.tank_model_settings = {
-		width :50,
+		width : 50,
 		length : 65	
 	}
 
 	this.tank_control_config = {
 		tank_rotation : 3, // degrees
 		gun_rotation : 3, // degrees 
-		position_offset : 5 // pixels on the canvas  
+		position_offset : 2 // pixels on the canvas  
 	};
 
 	this.bullet_model_settings = {
