@@ -302,16 +302,16 @@ function handle_game_channel(socket,components){
 	if(components[1] == 'game-state')
 	{
 		// update from server about game state.
-		var player_set = JSON.parse(components[2]);
-		if(player_set == null)
+		var game_state = JSON.parse(components[2]);
+		if(game_state == null)
 		{
-			log('handle_game_channel::game-state', 'player_set is null');
+			log('handle_game_channel::game-state', 'game_state is null');
 			return false;
 		}
 		else
-			log('handle_game_channel::game-state' , 'player_set : '+JSON.stringify(Global.game_state.player_set));
+			log('handle_game_channel::game-state' , 'game_state: '+JSON.stringify(Global.game_state.player_set));
 		
-		Global.game_state.player_set = player_set;
+		Global.game_state = game_state;
 	}
 }
 
@@ -464,28 +464,55 @@ function clear_canvas(){
 function render_game(){
 	//console.log('render_game called');
 	
+	// render all the tanks
+	var my_tank_obj ;
+
 	if(Global.game_state.player_set == null)
 	{
 		log('render_game' , 'game_state is not defined');
 		return false;
 	}	
 
-	var tank_obj_list = [];	
 	var player_set = Global.game_state.player_set;
 	if(player_set == null )
 		return false;
 
-	for(var player_id in player_set)
+	for(var user_id in player_set)
 	{
-		var player_obj = player_set[player_id];
+
+		var player_obj = player_set[user_id];
 		var tank_obj = new Tank(tank_model_settings.width , tank_model_settings.length , player_obj.preferred_color);
+		
+		my_tank_obj = tank_obj;  // not suppposed to be here.
+
 		tank_obj.set_tank_position(player_obj.tank_properties.current_position);
 		tank_obj.set_tank_orientation(player_obj.tank_properties.tank_orientation);
 		tank_obj.render(Global.ctx);
-
-		tank_obj_list[tank_obj_list] = tank_obj;
 	}
 
+	// render all bullets
+	if(Global.game_state.bullet_set == null)
+	{
+		log('render_game' , 'game_state is not defined');
+		return false;
+	}
+
+	var bullet_set = Global.game_state.bullet_set;
+
+	for(var user_id in bullet_set)
+	{
+		var bullet = bullet_set[user_id];
+		var current_position = bullet.current_position;
+		var bullet_angle = bullet.bullet_angle;
+		//Bullet = function (width , length , color , current_position , projection_angle){
+		var bullet_obj = new Bullet(bullet_model_settings.width , bullet_model_settings.length , bullet_model_settings.color , 
+									current_position , bullet_angle);
+		console.log('bullet angle : '+bullet_angle);
+		console.log('bullet position : '+JSON.stringify(current_position));
+      	console.log('gun tip :  '+JSON.stringify(my_tank_obj.get_gun_tip()));
+
+		bullet_obj.render(Global.ctx);
+	}
 
 	return true;
 }

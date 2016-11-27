@@ -178,7 +178,7 @@ Tank.Tank.prototype.get_gun_tip = function(){
 
 	var position_vector = {};
 	position_vector.x = this.get_tank_position().x + this.get_gun_length()*Math.cos(this.get_gun_angle() * Math.PI/180);
-	position_vector.y = this.get_tank_position().y + this.get_gun_length()*Math.sin(this.get_gun_angle() * Math.PI/180);
+	position_vector.y = this.get_tank_position().y - this.get_gun_length()*Math.sin(this.get_gun_angle() * Math.PI/180);
 	return position_vector;
 }
 
@@ -190,7 +190,7 @@ Tank.Tank.prototype.get_gun_pivot = function(){
 	return this.current_position ;
 }
 
-Tank.Tank.prototype.render = function(){
+Tank.Tank.prototype.render = function(ctx){
 	// renders all the components of the tank with respect to its position and angle.
 
 	// first render Tank Body Components
@@ -376,6 +376,80 @@ Tank.areTankOverlapping = function(tank_obj_a , tank_obj_b)
 	}
 	return false;       // not overlapping
 }
+
+Tank.Bullet = function (width , length , color , current_position , projection_angle){
+	console.log('bullet constructor : '+JSON.stringify(current_position)+ JSON.stringify(projection_angle));
+	this.width = width;
+	this.length = length;
+	this.color = color
+	this.current_position = current_position;
+	this.projection_angle = projection_angle;
+}
+
+Tank.Bullet.prototype.get_bullet_position = function(){
+	return this.current_position;
+}
+
+Tank.Bullet.prototype.set_bullet_position = function(new_position){
+	this.current_position = new_position;
+}
+
+Tank.Bullet.prototype.get_bullet_width = function(){
+	return this.width;
+}
+
+Tank.Bullet.prototype.get_bullet_length = function(){
+	return this.length;
+}
+
+Tank.Bullet.prototype.get_bullet_angle = function(){
+	return this.projection_angle;
+}
+
+
+Tank.Bullet.prototype.getBulletRect = function(){
+	bullet_obj_a = this;
+
+	var bullet_length = bullet_obj_a.get_bullet_length();
+	var bullet_width = bullet_obj_a.get_bullet_width();
+	var position = bullet_obj_a.get_bullet_position();
+	var bullet_angle = bullet_obj_a.get_bullet_angle();
+
+	var phi = Math.atan2(bullet_width , bullet_length)*180 / Math.PI;
+
+	var r = Math.sqrt(bullet_length/2 *bullet_length/2 + bullet_width/2 * bullet_width/2);
+
+	var pointRT = new Point(position.x + r*Math.cos((phi + bullet_angle )*Math.PI/180) , position.y - r*Math.sin((phi + bullet_angle) * Math.PI/180));
+	var pointLT	= new Point(position.x + r*Math.cos((180 - phi + bullet_angle )*Math.PI/180) , position.y - r* Math.sin((180 - phi + bullet_angle)*Math.PI/180));
+	var pointLB = new Point(position.x + r*Math.cos( (180 + phi + bullet_angle ) * Math.PI/180) , position.y - r* Math.sin( (180 + phi + bullet_angle) * Math.PI/180))
+	var pointRB = new Point(position.x + r*Math.cos( (360 - phi + bullet_angle ) * Math.PI/180) , position.y - r* Math.sin( (360 - phi + bullet_angle) * Math.PI/180));
+
+	var rect_body_a = new Rectangle(pointLT , pointLB, pointRT , pointRB);
+	//console.log(JSON.stringify(rect_body_a));
+	return rect_body_a;
+	
+}
+
+Tank.Bullet.prototype.render = function(ctx){
+	ctx.save();
+	ctx.beginPath();
+
+	var position = this.get_bullet_position();
+	var bullet_angle = this.get_bullet_angle();
+	var bullet_length = this.get_bullet_length();
+	var bullet_width = this.get_bullet_width();
+
+	var rotation_angle = 360 - bullet_angle;
+	ctx.translate(position.x,position.y);
+	ctx.rotate(rotation_angle * Math.PI / 180);
+	ctx.translate(-bullet_length/2 , -bullet_width/2);
+	ctx.fillRect(0 ,0 ,bullet_length ,  bullet_width );
+
+	ctx.closePath();
+	ctx.restore();
+
+}
+
 
 var RectangularComponent = function(x_offset , y_offset , width ,length,color){
 	// x_offset x-axis offset from centre of the Tank

@@ -1,9 +1,6 @@
-///////////////////////////////////////////////
-//######### update the code and use #########//
-///////////////////////////////////////////////
 
 
- function Tank (width , length , color){
+function Tank(width , length , color){
 	/*
 	how the tank looks on the canvas 
 
@@ -95,7 +92,6 @@
 	// --------------------------------------
 }
 
-/* tank API */
 Tank.prototype.set_tank_position = function( position_vector){
 	if(position_vector.x == null || position_vector.y == null)
 		return;
@@ -192,7 +188,7 @@ Tank.prototype.get_gun_pivot = function(){
 
 Tank.prototype.render = function(ctx){
 	// renders all the components of the tank with respect to its position and angle.
-	// on the given canvas context (ctx).
+
 	// first render Tank Body Components
 	ctx.beginPath();
 
@@ -274,6 +270,59 @@ Tank.prototype.render = function(ctx){
 
 	ctx.closePath();
 }
+
+Tank.prototype.getTankBodyRect = function(){
+	/*
+		@return : a Rectangle object , which represents the rectangle enclosing Tank Body.
+		used for collision detection purpose.	
+	*/
+	tank_obj_a = this;
+
+	var tank_length = tank_obj_a.get_tank_length();
+	var tank_width = tank_obj_a.get_tank_width();
+	var position = tank_obj_a.get_tank_position();
+	var tank_angle = tank_obj_a.get_tank_angle();
+
+	var phi = Math.atan2(tank_width , tank_length)*180 / Math.PI;
+
+	var r = Math.sqrt(tank_length/2 *tank_length/2 + tank_width/2 * tank_width/2);
+
+	var pointRT = new Point(position.x + r*Math.cos((phi + tank_angle )*Math.PI/180) , position.y - r*Math.sin((phi + tank_angle) * Math.PI/180));
+	var pointLT	= new Point(position.x + r*Math.cos((180 - phi + tank_angle )*Math.PI/180) , position.y - r* Math.sin((180 - phi + tank_angle)*Math.PI/180));
+	var pointLB = new Point(position.x + r*Math.cos( (180 + phi + tank_angle ) * Math.PI/180) , position.y - r* Math.sin( (180 + phi + tank_angle) * Math.PI/180))
+	var pointRB = new Point(position.x + r*Math.cos( (360 - phi + tank_angle ) * Math.PI/180) , position.y - r* Math.sin( (360 - phi + tank_angle) * Math.PI/180));
+
+	var rect_body_a = new Rectangle(pointLT , pointLB, pointRT , pointRB);
+	//console.log(JSON.stringify(rect_body_a));
+	return rect_body_a;
+}
+
+Tank.prototype.getTankGunRect = function(){
+
+	/*
+		@return : a Rectangle object , which represents the rectangle enclosing Tank Gun.
+		used for collision detection purpose.
+	*/
+	tank_obj_a = this;
+
+	var gun_length = tank_obj_a.get_gun_length();
+	var gun_width = tank_obj_a.get_gun_width();
+	var gun_pivot = tank_obj_a.get_gun_pivot();
+	var gun_angle = tank_obj_a.get_gun_angle();
+
+	var phi = Math.atan2(gun_width/2 , gun_length)*180 / Math.PI;
+
+	var r = Math.sqrt(gun_width/2 * gun_width/2 + gun_length*gun_length);
+
+	var pointLT	= new Point(gun_pivot.x - gun_width/2*Math.sin(gun_angle*Math.PI/180) , gun_pivot.y - gun_width/2*Math.sin((90+gun_angle)*Math.PI/180));
+	var pointLB = new Point(gun_pivot.x + gun_width/2*Math.sin(gun_angle*Math.PI/180) , gun_pivot.y + gun_width/2*Math.sin((90+gun_angle)*Math.PI/180));
+	var pointRT = new Point(gun_pivot.x + r*Math.cos( (gun_angle+phi) * Math.PI/180) , gun_pivot.y - r*Math.sin( (gun_angle+phi) * Math.PI/180));
+	var pointRB = new Point(gun_pivot.x + r*Math.cos( (gun_angle+(360-phi))*Math.PI/180) , gun_pivot.y - r*Math.sin( (gun_angle+(360-phi))*Math.PI/180));
+
+	var rect_gun_a = new Rectangle(pointLT , pointLB, pointRT , pointRB);
+	//console.log(JSON.stringify(rect_gun_a));
+	return rect_gun_a;	
+} 
 
 Tank.prototype.checkTankCollision = function(tank_obj){
 	//todo
@@ -418,4 +467,76 @@ function CircularComponent (x_offset , y_offset , radius,color){
 	this.y_offset = y_offset;
 	this.radius = radius;
 	this.color = color;
-};
+}
+
+function Bullet(width , length , color , current_position , projection_angle){
+	this.width = width;
+	this.length = length;
+	this.color = color
+	this.current_position = current_position;
+	this.projection_angle = projection_angle;
+}
+
+Bullet.prototype.get_bullet_position = function(){
+	return this.current_position;
+}
+
+Bullet.prototype.set_bullet_position = function(new_position){
+	this.current_position = new_position;
+}
+
+Bullet.prototype.get_bullet_width = function(){
+	return this.width;
+}
+
+Bullet.prototype.get_bullet_length = function(){
+	return this.length;
+}
+
+Bullet.prototype.get_bullet_angle = function(){
+	return this.projection_angle;
+}
+
+Bullet.prototype.getBulletRect = function(){
+	bullet_obj_a = this;
+
+	var bullet_length = bullet_obj_a.get_bullet_length();
+	var bullet_width = bullet_obj_a.get_bullet_width();
+	var position = bullet_obj_a.get_bullet_position();
+	var bullet_angle = bullet_obj_a.get_bullet_angle();
+
+	var phi = Math.atan2(bullet_width , bullet_length)*180 / Math.PI;
+
+	var r = Math.sqrt(bullet_length/2 *bullet_length/2 + bullet_width/2 * bullet_width/2);
+
+	var pointRT = new Point(position.x + r*Math.cos((phi + bullet_angle )*Math.PI/180) , position.y - r*Math.sin((phi + bullet_angle) * Math.PI/180));
+	var pointLT	= new Point(position.x + r*Math.cos((180 - phi + bullet_angle )*Math.PI/180) , position.y - r* Math.sin((180 - phi + bullet_angle)*Math.PI/180));
+	var pointLB = new Point(position.x + r*Math.cos( (180 + phi + bullet_angle ) * Math.PI/180) , position.y - r* Math.sin( (180 + phi + bullet_angle) * Math.PI/180))
+	var pointRB = new Point(position.x + r*Math.cos( (360 - phi + bullet_angle ) * Math.PI/180) , position.y - r* Math.sin( (360 - phi + bullet_angle) * Math.PI/180));
+
+	var rect_body_a = new Rectangle(pointLT , pointLB, pointRT , pointRB);
+	//console.log(JSON.stringify(rect_body_a));
+	return rect_body_a;
+	
+}
+
+Bullet.prototype.render = function(ctx){
+	ctx.save();
+	ctx.beginPath();
+
+	var position = this.get_bullet_position();
+	var bullet_angle = this.get_bullet_angle();
+	var bullet_length = this.get_bullet_length();
+	var bullet_width = this.get_bullet_width();
+
+	var rotation_angle = 360 - bullet_angle;
+	ctx.translate(position.x,position.y);
+	ctx.rotate(rotation_angle * Math.PI / 180);
+	ctx.translate(-bullet_length/2 , -bullet_width/2);
+	ctx.fillRect(0 ,0 ,bullet_length ,  bullet_width );
+
+	ctx.closePath();
+	ctx.restore();
+
+}
+

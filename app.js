@@ -3,6 +3,7 @@ require('./lib_common.js');
 Game = require('./lib_Game.js').Game;
 Player = require('./lib_Player.js');
 Tank = require('./lib_Tank.js').Tank;
+Bullet = require('./lib_Tank.js').Bullet;
 
 //###################################################### Express Server setup #####################################################
 
@@ -432,10 +433,15 @@ function handle_game_channel(socket,user_id,components){
   else if(components[2] == 'get-game-state')
   {
     var player_set = game_obj.getPlayerSet();
+    var bullet_set = game_obj.getBulletSet();
+    
     var game_state = {};
-    for(var player_id in player_set)
+    
+    // emit individual Tank information
+    var new_player_set = {}
+    for(var user_id in player_set)
     {
-      var player_obj = player_set[player_id];
+      var player_obj = player_set[user_id];
 
       var player_state = {};
       player_state.id = player_obj.getId();
@@ -446,8 +452,24 @@ function handle_game_channel(socket,user_id,components){
       player_state.tank_properties.current_position = player_obj.getTank().get_tank_position();
       player_state.tank_properties.tank_orientation = player_obj.getTank().get_tank_orientation();
 
-      game_state[player_id] = player_state;
+      new_player_set[user_id] = player_state;
     }
+    game_state.player_set = new_player_set;
+
+    // emit all the bullet information
+    var new_bullet_set = {}
+    for(var user_id in bullet_set)
+    {
+      var bullet_obj = bullet_set[user_id];
+
+      var bullet_state = {};
+      bullet_state.user_id = user_id;
+      bullet_state.current_position = bullet_obj.get_bullet_position();
+      bullet_state.bullet_angle = bullet_obj.get_bullet_angle();
+      new_bullet_set[user_id] = bullet_state;
+    }
+    game_state.bullet_set = new_bullet_set;
+
     emit_game_state(socket,game_id,game_state);
   }
   else if(components[2] == 'leave-game')
@@ -475,16 +497,6 @@ function emit_game_state(socket,game_id,game_state){
 function emit_message_to_client(socket,channel ,message){
   log('emit_message_to_client','client id : ' + socket.id +' , channel : '+channel +' , message : '+message);
   socket.emit(channel , message);
-}
-
-function log(header, message){
-  if(!logEnable)
-    return;
-
-  console.log('-----------------------# ' + header + ' #---------------------------------');
-  console.log(message);
-  console.log('-----------------------------------------------------------------------------'); 
-  console.log('');
 }
 
 //#############################################################################################################################

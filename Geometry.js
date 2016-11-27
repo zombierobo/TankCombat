@@ -29,7 +29,7 @@ function Rectangle(pointLT , pointLB ,pointRT, pointRB)
 	this.pointRB = pointRB;
 }
 
-function areRectangleOverlapping(rectangle_obj_a ,rectangle_obj_b ){
+function areRectangleOverlapping(rectangle_obj_a ,rectangle_obj_b ){	
 	//console.log('areRectangleOverlapping : '+JSON.stringify(rectangle_obj_a) + ' : '+JSON.stringify(rectangle_obj_b));
 	if(rectangle_obj_a == null || rectangle_obj_b == null)
 	{

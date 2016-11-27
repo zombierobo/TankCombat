@@ -19,6 +19,7 @@ Game.Game = function(game_id , map_id , max_players , max_game_time,tank_model)
 
   this.score_sheet = {};
   this.player_set = {};
+  this.bullet_set = {}; // contains all the bullets in the game.
 
   this.elapsed_time = 0;
   
@@ -54,7 +55,7 @@ Game.Game.prototype.addPlayer = function(user_id,nick_name){
     if(getMapSize(this.player_set) + 1 > this.max_players)
         return false ;      // game room full
 
-    var player_obj = new Player(user_id,nick_name,'blue',this.tank_model);
+    var player_obj = new Player(user_id,nick_name,'blue',tank_model_settings);
     this.player_set[user_id] = player_obj;
     return true;
 }
@@ -73,6 +74,10 @@ Game.Game.prototype.getPlayer = function(user_id){
 
 Game.Game.prototype.getPlayerSet = function() {
   return this.player_set;
+}
+
+Game.Game.prototype.getBulletSet = function(){
+  return this.bullet_set;
 }
 
 Game.Game.prototype.getPlayerCount = function(){
@@ -143,16 +148,43 @@ Game.Game.prototype.processClientUpdates = function(){
       var user_id = update.user_id;
       var commandSet = update.commandSet;
 
+      // handle movement commands
+
       var tank_obj = this.getPlayer(user_id).getTank();
+      if(tank_obj != null)
+      {
 
-      var dummy_tank = this.handle_tank_movement(tank_obj,null,null,commandSet);
-  
+        var dummy_tank = this.handle_tank_movement(tank_obj,null,null,commandSet);
+    
+        log('processClientUpdates','dummy_tank : '+JSON.stringify(dummy_tank));
 
-      log('processClientUpdates','dummy_tank : '+JSON.stringify(dummy_tank));
+        tank_obj.set_tank_position(dummy_tank.get_tank_position());
+        tank_obj.set_tank_angle(dummy_tank.get_tank_angle());
+        tank_obj.set_gun_angle(dummy_tank.get_gun_angle());
+      
+        // handle fire command
+        if(commandSet.isSpacePressed)
+        {
+          // check if this user_id has a bullet in game.
+          if(this.getBulletSet().user_id ==null)
+          {
+            var gun_angle = tank_obj.get_gun_angle();
+            var position = tank_obj.get_gun_tip();
 
-      tank_obj.set_tank_position(dummy_tank.get_tank_position());
-      tank_obj.set_tank_angle(dummy_tank.get_tank_angle());
-      tank_obj.set_gun_angle(dummy_tank.get_gun_angle());
+            var bullet_position = {};
+            bullet_position.x = position.x
+            bullet_position.y = position.y;
+
+            // Tank.Bullet = function (width , length , color , current_position , projection_angle){
+            var bullet_obj = new Bullet(bullet_model_settings.width , bullet_model_settings.length , bullet_model_settings.color , bullet_position , gun_angle);
+
+            // bullet added to bullet set , the source of the bullet is user_id.
+            this.getBulletSet().user_id = bullet_obj;
+
+            log('BULLET FIRE COMMAND HANDLE','user_id : '+user_id + ' , gun tip : '+ JSON.stringify(position) + ' , gun_angle : ' + gun_angle + ' , bullet obj : '+JSON.stringify(bullet_obj));
+          }
+        }
+      }
 
     }
 
@@ -162,8 +194,53 @@ Game.Game.prototype.processClientUpdates = function(){
     log('latest games state',JSON.stringify(this.getPlayerSet()));
 }
 
+Game.Game.prototype.processBulletPosition = function(){
+  var bullet_set = this.getBulletSet();
+  if(bullet_set == null)
+    return;
+
+  for(var user_id in bullet_set)
+  {
+    var bullet_obj = bullet_set[user_id];
+    var current_position = bullet_obj.get_bullet_position();
+    
+    if(current_position.x < 0 || current_position.x > 1000 || current_position.y < 0 || current_position.y > 1000)
+    {
+      // bullet out of boundary
+      continue;
+    }
+    else
+    {
+      var projection_angle = bullet_obj.get_bullet_angle();
+      var bullet_offset = bullet_control_config.bullet_offset_per_frame;
+
+      var new_position = {}
+      new_position.x = current_position.x + bullet_offset * Math.cos(projection_angle * Math.PI/180); 
+      new_position.y = current_position.y - bullet_offset * Math.sin(projection_angle * Math.PI/180); 
+
+      bullet_obj.set_bullet_position(new_position);
+
+      log('AFTER BULLET UPDATE','bullet_obj : '+JSON.stringify(bullet_obj));
+    }
+  }
+
+  for(var user_id in bullet_set)
+  {
+    var bullet_obj = bullet_set[user_id];
+    var current_position = bullet_obj.get_bullet_position();
+    
+    if(current_position.x < 0 || current_position.x > 1000 || current_position.y < 0 || current_position.y > 1000)
+    {
+      // bullet out of boundary
+      log('BULLET DELETE EVENT ' ,'bullet_obj : '+JSON.stringify(bullet_obj))
+      delete bullet_set[user_id];
+    }
+  }
+}
+
 Game.Game.prototype.game_loop = function(){
     this.processClientUpdates();
+    this.processBulletPosition();
 }
 
 // scoresheets not implemented as of now.
@@ -262,3 +339,5 @@ Game.Game.prototype.emit_game_state = function(){
 }
 
 module.exports = Game;
+
+// helper function
