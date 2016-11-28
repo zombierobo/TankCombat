@@ -119,8 +119,16 @@ function load_game_list(new_games_list) {
 	for(var game_id in new_games_list)
 	{
 		var game_state = new_games_list[game_id];
-		game_list_node.append('<li>' + 'Game ID - '+game_state.id +' Map Id - '+game_state.map_id+ ' in game : '+ game_state.player_count+
-								' Max Players : '+game_state.max_players + ' max game time '+ game_state.max_game_time+ ' state : ' + game_state.state+'</li>');
+		var li = document.createElement('li');
+		li.innerHTML = 'Game ID - ' + game_state.id + ' Map Id - ' + game_state.map_id + ' in game : '
+						+ game_state.player_count + ' Max Players : ' + game_state.max_players
+						+ ' max game time '+ game_state.max_game_time + ' state : ' + game_state.state +
+						'<br> <button id="join-button">Join</button>';
+		li.querySelector('button').addEventListener('click', function(e) {
+			console.log(game_id);
+			join_game(game_id);
+		})
+		game_list_node.append(li);
 	}
 }
 
@@ -287,7 +295,6 @@ Global.client_frame_rate = 1000/frame_rate_settings.client_fps;
 Global.canvas = document.getElementById('myCanvas');
 Global.ctx = Global.canvas.getContext('2d');
 
-Global.keyboard = new KeyboardState();
 Global.game_state = {};
 
 
@@ -320,6 +327,7 @@ function main_game_loop(){
 	handle_key_stroke();
 	clear_canvas();
 	render_game();
+	update_score_sheet();
 }
 
 function handle_key_stroke(){
@@ -527,6 +535,27 @@ function render_game(){
 	return true;
 }
 
+function update_score_sheet(){
+	var player_set = Global.game_state.player_set;
+	$('#score-sheet').empty();
+
+	for(var player_id in player_set)
+	{
+		var player_obj = player_set[player_id];
+		
+		var nickname = player_obj.nickname;
+		var health = player_obj.health;
+		var kills = player_obj.score.kills;
+		var deaths = player_obj.score.deaths;
+		var color = player_obj.preferred_color;
+
+		$('#score-sheet').append(
+			$('<li>').append('nickname : ' + nickname +' kills : '+kills + ' deaths : '+deaths +' health : '+health)
+		);
+	}
+
+}
+
 //######################################################################################################################################
 
 
@@ -545,25 +574,38 @@ function change_client_state(new_state){
 		clearInterval(Global.lobby_interval);
 
 	if(Global.client_state == in_game)
+	{
+		// stop game loop
 		clearInterval(Global.game_interval);
+	
+		// stop listening to key events
+		Global.keyboard.destroy();
+	}
 
 	if(new_state == in_app)
 	{
 		update_app_status_bar(in_app);
 		Global.app_interval = setInterval(refresh_game_list , 3000); // refresh game list every three second.
 		Global.client_state = in_app;
+		displayPhase(in_app);
 	}
 	else if(new_state == in_lobby)
 	{
 		update_app_status_bar(in_lobby);
 		Global.client_state = new_state;
 		Global.lobby_interval = setInterval(refresh_lobby_list , 2000); // refresh lobby list every 2 second.
+		displayPhase(in_lobby);
 	}
 	else if(new_state == in_game)
 	{
+		// listen to keyboard events
+
+		Global.keyboard = new KeyboardState();
+
 		update_app_status_bar(in_game);
 		Global.client_state = new_state;
 		Global.game_interval = setInterval(main_game_loop , Global.client_frame_rate);
+		displayPhase(in_game);
 	}
 	else
 	{
@@ -593,3 +635,71 @@ function log(header, message){
 	console.log('');
 }
 //#######################################################################################################################################
+
+
+
+function displayPhase(phaseId) {
+	console.log('Transitioning to: ' + phaseId);
+	var phaseIds = [in_app, in_lobby, in_game];
+	phaseIds.forEach(function(id) {
+		document.querySelector('#' + id).style.display = "none";
+	});
+
+	if (phaseId == in_game) {
+		document.querySelector('#app-container').style.display = "none";
+	}
+
+	document.querySelector('#' + phaseId).style.display = "inline-block";
+}
+
+
+
+function handleNewGameClick() {
+	console.log("Initiating game");
+	var mapid = $('#' + in_app).find('#map_id').val(),
+		max_players = $('#' + in_app).find('#max_players').val(),
+		game_time = $('#' + in_app).find('#game_time').val();
+
+	console.log('mapid : ' + mapid + ' max_players : ' + max_players + ' game_time : '+game_time )
+	if(max_players == null || mapid == null || game_time == null)
+		return;
+
+	create_new_game(mapid, max_players, game_time);
+	change_client_state(in_lobby);
+}
+
+function handleNicknameChange(){
+	console.log("changing nickname");
+
+	var nickname = $('#' + in_lobby).find('#nickname').val();
+	$('#' + in_lobby).find('#nickname').val('');
+	if(nickname == null || nickname.length == 0)
+		return;
+
+	change_nickname(Global.user_id , Global.game_id , nickname);
+}
+
+function handle_lobby_state_change(new_lobby_state){
+	change_lobby_state(Global.user_id , Global.game_id , new_lobby_state);
+}
+
+$('#gameRoomCreation').on('submit', function(e) {
+	e.preventDefault();
+	handleNewGameClick();
+});
+
+$('#nickNameForm').on('submit' , function(e){
+	e.preventDefault();
+	handleNicknameChange();
+});
+
+$('#Ready-button').on('click' , function(e){
+	e.preventDefault();
+	var new_lobby_state = 'ready'
+	handle_lobby_state_change(new_lobby_state);
+});
+
+$('#Launch-button').on('click',function(e){
+	e.preventDefault();
+	start_game(Global.user_id , Global.game_id);
+})

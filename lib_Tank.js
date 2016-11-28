@@ -329,54 +329,6 @@ Tank.Tank.prototype.getTankGunRect = function(){
 	return rect_gun_a;	
 } 
 
-Tank.areTankOverlapping = function(tank_obj_a , tank_obj_b){
-	/*
-		function to check if two tanks overlap with each other.
-		used in collision detection
-
-		return true if they overlap 
-		false otherwise
-	*/
-
-	// check arguments
-	if(tank_obj_a == null || tank_obj_b == null)
-		return false;
-
-	// check if tank body overlap
-
-	var rect_body_a = getTankBodyRect(tank_obj_a);
-	var rect_body_b = getTankBodyRect(tank_obj_b);
-
-	if(areRectangleOverlapping(rect_body_a , rect_body_b))
-	{
-		console.log('areTankOverlapping : tank body - tank body overlapping');
-		return true;
-	}
-	// check if tank guns overlap
-
-	var rect_gun_a = getTankGunRect(tank_obj_a);
-	var rect_gun_b = getTankGunRect(tank_obj_b);
-
-	if(areRectangleOverlapping(rect_gun_a , rect_gun_b))
-	{
-		console.log('areTankOverlapping : gun - gun overlapping');
-		return true;
-	}
-	// check if gun of one tank overlaps body of another
-
-	if(areRectangleOverlapping(rect_gun_a , rect_body_b))
-	{
-		console.log('areTankOverlapping : gun - tank body overlapping');
-		return true;
-	}	
-	if(areRectangleOverlapping(rect_gun_b , rect_body_a))
-	{
-		console.log('areTankOverlapping : tank body - gun overlapping');
-		return true;
-	}
-	return false;       // not overlapping
-}
-
 Tank.Bullet = function (width , length , color , current_position , projection_angle){
 	//console.log('bullet constructor : '+JSON.stringify(current_position)+ JSON.stringify(projection_angle));
 	
@@ -448,6 +400,67 @@ Tank.Bullet.prototype.render = function(ctx){
 
 	ctx.closePath();
 	ctx.restore();
+}
+
+Tank.areTankOverlapping = function(tank_obj_a , tank_obj_b){
+	/*
+		function to check if two tanks overlap with each other.
+		used in collision detection
+
+		return true if they overlap 
+		false otherwise
+	*/
+
+	// check arguments
+	if(tank_obj_a == null || tank_obj_b == null)
+		return false;
+
+	// check if tank body overlap
+
+	var rect_body_a = tank_obj_a.getTankBodyRect();
+	var rect_body_b = tank_obj_b.getTankBodyRect();
+
+	if(areRectangleOverlapping(rect_body_a , rect_body_b))
+	{
+		log('areTankOverlapping' , 'tank body - tank body overlapping');
+		return true;
+	}
+	// check if tank guns overlap
+
+	var rect_gun_a = tank_obj_a.getTankGunRect();
+	var rect_gun_b = tank_obj_b.getTankGunRect();
+
+	if(areRectangleOverlapping(rect_gun_a , rect_gun_b))
+	{
+		log('areTankOverlapping','gun - gun overlapping');
+		return true;
+	}
+	// check if gun of one tank overlaps body of another
+
+	if(areRectangleOverlapping(rect_gun_a , rect_body_b))
+	{
+		log('areTankOverlapping','gun - tank body overlapping');
+		return true;
+	}	
+	if(areRectangleOverlapping(rect_gun_b , rect_body_a))
+	{
+		log('areTankOverlapping','tank body - gun overlapping');
+		return true;
+	}
+	return false;       // not overlapping
+}
+
+Tank.areBulletTankOverlapping = function(bullet_obj , tank_obj){
+	bullet_rect = bullet_obj.getBulletRect();
+	tank_body_rect = tank_obj.getTankBodyRect();
+	tank_gun_rect = tank_obj.getTankGunRect();
+			
+	if(areRectangleOverlapping(bullet_rect , tank_body_rect))
+		return true;
+	if(areRectangleOverlapping(bullet_rect , tank_gun_rect))
+		return true;
+
+	return false;
 }
 
 var RectangularComponent = function(x_offset , y_offset , width ,length,color){

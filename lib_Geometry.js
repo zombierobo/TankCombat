@@ -115,9 +115,9 @@ Geometry.areRectangleOverlapping = function(rectangle_obj_a ,rectangle_obj_b ){
 	if(bottomA < topB)
 		return false; // overlapping impossible
 
-	console.log('areRectangleOverlapping : rectangle overlapping');
-	console.log(JSON.stringify(rectangle_obj_a));
-	console.log(JSON.stringify(rectangle_obj_b));
-	console.log('-------------------------------------------');
+	//console.log('areRectangleOverlapping : rectangle overlapping');
+	//console.log(JSON.stringify(rectangle_obj_a));
+	//console.log(JSON.stringify(rectangle_obj_b));
+	//console.log('-------------------------------------------');
 	return true ; // overlappping
 }

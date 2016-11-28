@@ -33,6 +33,10 @@
 		bullet_offset_per_frame : 30
 	}
 
+	this.game_play = {
+		health_reduction_per_bullet : 10
+	}
+
 	this.getMapSize = function(map){
 		if(map != null)
 	    	return Object.keys(map).length;

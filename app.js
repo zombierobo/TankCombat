@@ -61,8 +61,6 @@ app.get( '/*' , function( req, res, next ) {
   Player object - {player_id, nick_name , lobby_state};
 */
 
-var logEnable = false;
-
 // Global list of Users
 var users_set = {};
 
@@ -71,6 +69,7 @@ var games_set = {};
 
 // Global list of Maps
 var maps_set = {}; 
+
 
 // some constants
 var in_app = 'in_app';
@@ -134,14 +133,15 @@ io.on('connection', function(socket){
 function handle_client_message(socket , channel , message){
     var components = message.split('$');
     var user_id = components[0] ; // identify client
-    if(user_id == null || users_set['/#'+user_id ] == null)
+    // Check for presence: --- users_set.hasOwnProperty(user_id)
+    if(user_id == null || users_set[user_id ] == null)
     {
       log("handle_client_message::"+channel , 'Unrecognized user , user_id : '+user_id);
       return;
     }
     else
     {
-      user_id = '/#'+user_id;
+      //user_id = '/#'+user_id;
     }
 
     if(channel == in_app)
@@ -448,6 +448,7 @@ function handle_game_channel(socket,user_id,components){
       player_state.nickname = player_obj.getNickname();
       player_state.health = player_obj.getHealth();
       player_state.preferred_color = player_obj.getColor();
+      player_state.score = player_obj.getScore();
       player_state.tank_properties = {};
       player_state.tank_properties.current_position = player_obj.getTank().get_tank_position();
       player_state.tank_properties.tank_orientation = player_obj.getTank().get_tank_orientation();

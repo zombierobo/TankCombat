@@ -16,40 +16,108 @@
 		#in-game{
 			display: none;
 		}
+
+		     #app-container {
+            margin-top: 5%;
+            height: 70%;
+            margin-left: auto;
+            margin-right: auto;
+            position: absolute;
+            top:0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 60%;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 50px;
+        }
+
+        #sub-app-container {
+        	margin: 0 auto;
+        	width: 50%;
+        }
+
+        .label-txt {
+        }
+
+
 	</style>
+    <link rel="stylesheet" type="text/css" href="lib/semantic.css"/>
 </head>
-<body>
-	<div id='game'>
+<body style="background-image: url('/images/background4.jpg');">
+
+	<div id="app-container">
+
+		<div id="sub-app-container">
+
 		<div style="float : right;">
 			<span id="app-state" style="font-weight : bold;"></span>
 		</div>
+
 		<div id="in_app" >
-			<h1>TankCombat (in app)</h1>
-			<ul id="list-of-games">
+			<h1 class="ui blue header">TankCombat</h1>
+			<br>
+
+			<h3 class="ui blue header">List of Active Game Rooms</h3>
+			<div class="ui divider"></div>
+			<ul class="ui vertical very relaxed list" id="list-of-games">
 					
 			</ul>
-			<h2>Create game</h2>
-			<form action="create_new_game()">
-				map id : <input type="number" name="map_id">			
-				maximum player : <input type="text" name="max_players">
-				game time : <input type="number" name="game_time">
+
+			<br><br>
+			<h3 class="ui blue header">Create game</h3>
+			<div class="ui divider"></div>
+			<form class="ui form" id="gameRoomCreation">
+				<div class="ui field">
+					<label class="label-txt">map id : </label>
+					<input type="number" id="map_id" name="map_id">			
+				</div>
+				<div class="ui field">
+					<label class="label-txt">maximum player :</label>
+					<input type="number" id="max_players" name="max_players">
+				</div>
+				<div class="ui field">
+					<label class="label-txt">game time :</label> 
+					<input type="number" id="game_time" name="game_time">
+				</div>
+				<button class="ui blue button" id="submit">Create Game</button>
 			</form>
 		</div>
 		
-		<div id="in_lobby">
+
+		<div id="in_lobby" style="display: none;">
 			<h1>Game lobby</h1>
-			<ul id="lobby-of-players">
+			<div class="ui divider"></div>
+			<ul id="lobby-of-players" class="ui vertical very relaxed list">
+				
+			</ul>
+			<br>
+			<form class="ui form" id="nickNameForm">
+				<div class="ui field">
+					<label class="label-txt">Nickname : </label>
+					<input type="text" id="nickname" name="nickname">			
+				</div>
+				<button class="ui blue button" id="submit">Set Nickname</button>
+			</form>
+			<br>
+			<button class="ui blue button" id="Ready-button">Ready</button>
+			<button class="ui blue button" id="Launch-button">Launch Game</button>
+		</div>
+
+		</div>
+	</div>
+
+
+
+		<div id="in_game" style="background-image: url('/images/desert.jpg'); display: none;">
+			<canvas id = "myCanvas" width="1920" height="1080"></canvas>
+			<ul id="score-sheet" class="ui vertical very relaxed list">
 				
 			</ul>
 		</div>
-
-		<div id="in_game" >
-			<h1>in game</h1>
-			<canvas id = "myCanvas" width="1080" height="720"></canvas>
-		</div>
-	</div>
 		
 	<script type="text/javascript" src="lib/jquery-3.1.0.min.js"></script>
+	<script type="text/javascript" src="lib/semantic.js"></script>
 	<script type="text/javascript" src="lib/keyboard.js"></script>
 	<script type="text/javascript" src="lib_common.js"></script>
 	<script type="text/javascript" src="Tank.js"></script>

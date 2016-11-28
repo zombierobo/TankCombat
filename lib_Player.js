@@ -40,6 +40,11 @@ Player.prototype.getHealth = function(){
 }
 
 Player.prototype.setHealth = function(new_health){
+  if(new_health < 0)
+    new_health = 0;
+  if(new_health > 100)
+    new_health = 100;
+  
   this.health = new_health;
 }
 

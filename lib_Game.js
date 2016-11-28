@@ -2,6 +2,7 @@
 require('./lib_common.js');
 Tank = require('./lib_Tank.js').Tank;
 areTankOverlapping = require('./lib_Tank.js').areTankOverlapping;
+areBulletTankOverlapping = require('./lib_Tank.js').areBulletTankOverlapping;
 
 var Game = {}// = module.exports;
 
@@ -84,13 +85,33 @@ Game.Game.prototype.getPlayerCount = function(){
 Game.Game.prototype.startGame = function(){
     if(this.state == 'in-lobby')
     {
-      for(player_id in this.player_set) 
+      for(var player_id in this.player_set) 
       {
         if(this.player_set[player_id].getLobbyState() != 'ready')
           return false;  // some players are not in ready lobby state
       }
       // all players are ready
       // start game.
+
+      // set initial starting positions of the tanks and also health to 100
+
+      for(var player_id in this.player_set)
+      {
+        var player_obj = this.player_set[player_id];
+        var tank_obj = player_obj.getTank();
+        if(tank_obj == null)
+          continue;
+
+        var new_position = {};
+        new_position.x = Math.round(Math.random()*1080);
+        new_position.y = Math.round(Math.random()*700);
+        tank_obj.set_tank_position(new_position);
+        //console.log('set pos , for user_id :  ' + player_id + JSON.stringify(new_position));
+
+        // set health to 100
+        player_obj.setHealth(100);
+      }
+
       this.state = "game-started";
       var that = this;
       this.game_interval = setInterval(function(){that.game_loop();}, this.server_frame_rate)
@@ -151,9 +172,25 @@ Game.Game.prototype.processClientUpdates = function(){
       if(tank_obj != null)
       {
         var dummy_tank = this.handle_tank_movement(tank_obj,null,null,commandSet);
-    
+
         log('processClientUpdates','dummy_tank : '+JSON.stringify(dummy_tank));
-        if(dummy_tank != null)
+        
+        isColliding = false;
+
+        for(var other_player_id in this.player_set)
+        {
+          if(user_id != other_player_id)
+          {
+            var other_tank_obj = this.getPlayer(other_player_id).getTank();
+            if(areTankOverlapping(dummy_tank , other_tank_obj))
+            {
+              isColliding = true;
+              break;
+            }
+          }
+        }
+
+        if(!isColliding)
         {
           tank_obj.set_tank_position(dummy_tank.get_tank_position());
           tank_obj.set_tank_angle(dummy_tank.get_tank_angle());
@@ -201,7 +238,7 @@ Game.Game.prototype.processBulletPosition = function(){
     var bullet_obj = bullet_set[user_id];
     var current_position = bullet_obj.get_bullet_position();
     
-    if(current_position.x < 0 || current_position.x > 1000 || current_position.y < 0 || current_position.y > 1000)
+    if(current_position.x < 0 || current_position.x > 1920 || current_position.y < 0 || current_position.y > 1080)
     {
       // bullet out of boundary
       log('BULLET DELETE EVENT ' ,'bullet_obj : '+JSON.stringify(bullet_obj))
@@ -218,6 +255,35 @@ Game.Game.prototype.processBulletPosition = function(){
 
       bullet_obj.set_bullet_position(new_position);
 
+      for(var other_user_id in this.player_set)
+      {
+        if(other_user_id == user_id)
+          continue;
+
+        var tank_obj_a = (this.getPlayerSet())[other_user_id].getTank();
+
+        if(areBulletTankOverlapping(bullet_obj , tank_obj_a))
+        {
+          var player_obj_shooter = this.getPlayer(user_id);
+          var player_obj_hit = this.getPlayer(other_user_id);
+          
+          // reduce life of the player who got hit
+          player_obj_hit.setHealth(player_obj_hit.getHealth() - game_play.health_reduction_per_bullet);
+          
+          if(player_obj_hit.getHealth() == 0)
+          {
+            player_obj_hit.incrementDeaths();
+            player_obj_hit.setHealth(100);
+            player_obj_shooter.incrementKills();
+          }
+
+          // bullet out of boundary
+          log('BULLET DELETE EVENT ' ,'bullet_obj : '+JSON.stringify(bullet_obj))
+          delete bullet_set[user_id];
+        }
+
+        
+      }
       log('AFTER BULLET UPDATE','bullet_obj : '+JSON.stringify(bullet_obj));
     }
   }
