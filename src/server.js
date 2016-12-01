@@ -1,5 +1,3 @@
-//require('./lib_common.js');
-
 var Config = require('./Config.js');
 var log = Config.log;
 var getMapSize = Config.getMapSize;
@@ -11,7 +9,7 @@ Game = require('./Game.js');
 
 //###################################################### Express Server setup #####################################################
 
-var gameport = 3000;
+var gameport = process.argv[2] || 3000;
 var io = require('socket.io');
 var express= require('express');
 var UUID = require('node-uuid');
@@ -113,7 +111,6 @@ io.on('connection', function(socket){
     delete users_set[user_id];
     log( 'Users Set' ,JSON.stringify(users_set));
 
-    
     // remove user from lobby or a game
     for(var game_id in games_set)
     {
@@ -138,10 +135,6 @@ function handle_client_message(socket , channel , message){
     {
       log("handle_client_message::"+channel , 'Unrecognized user , user_id : '+user_id);
       return;
-    }
-    else
-    {
-      //user_id = '/#'+user_id;
     }
 
     if(channel == in_app)
@@ -193,15 +186,6 @@ function handle_app_channel(socket,user_id,components){
       var map_id = components[2];
       var max_players = components[3];
       var max_game_time = components[4];
-
-      /*
-      if(maps_set[map_id] == null) // bypass as of now
-      {
-          var message = "game-creation-unsuccessful" + '$' + "map_id does not exist";
-          emit_message_to_client(socket,in_app , message);
-          return;
-      }
-      */
 
       if(max_players == null || max_game_time == null)
       {
@@ -289,7 +273,7 @@ function handle_lobby_channel(socket,user_id,components){
         var message = 'game-terminated' + '$' + game_id;
         emit_message_to_client(socket,in_lobby,message); 
       }
-    }
+    }// get-lobby-state
     else if(components[2] == 'change-nickname')
     {
       var nickname = components[3];
@@ -304,13 +288,12 @@ function handle_lobby_channel(socket,user_id,components){
       {
        log('handle_lobby_channel::change-nickname' , 'error occured while changing nickname of player : '+user_id); 
       }
-    }
+    }// change-nickname
     else if(components[2] == 'change-preferred-color')
     {
       var new_color = components[3];
       if(new_color == 0 || new_color.length == 0)
         return ;
-
       try
       {
         game_obj.getPlayer(user_id).setColor(new_color);
@@ -319,7 +302,7 @@ function handle_lobby_channel(socket,user_id,components){
       {
         log('handle_lobby_channel::change-preferred-color' , 'error occured while changing preferred color of player : '+user_id);
       }
-    }
+    }// change preferred-color
     else if(components[2] == 'change-lobby-state')
     {
       var new_state = components[3];
@@ -334,7 +317,7 @@ function handle_lobby_channel(socket,user_id,components){
       {
         log('handle_lobby_channel::change-lobby-state' , 'error occured while changing lobby state of player : '+user_id);
       }
-    }
+    }// change-lobby-state
     else if(components[2] == 'leave-game-lobby')
     {
       try
@@ -345,7 +328,7 @@ function handle_lobby_channel(socket,user_id,components){
       {
         log('handle_lobby_channel::leave-game-lobby','error while removing a player from lobby');
       }
-    }
+    }// leave-game-lobby
     else if(components[2] == 'start-game')
     {
       try
@@ -367,7 +350,12 @@ function handle_lobby_channel(socket,user_id,components){
       {
         log('handle_lobby_channel::start-game','error occured while starting a game , game_id : '+game_id);  
       }
-    } 
+    }// start-game
+    else
+    {
+      var message = "invalid message format";
+      emit_message_to_client(socket,in_app,message); 
+    }// invalid message
 }
 
 function emit_lobby_list(socket,channel,game_id,player_set){
@@ -429,7 +417,7 @@ function handle_game_channel(socket,user_id,components){
     log('handle_game_channel::client-command' , 'update from client : '+user_id + ' , update : '+JSON.stringify(update));
     
     game_obj.addClientUpdate(user_id,update.commandSet , update.command_no , update.time_stamp);
-  }
+  }// client-command
   else if(components[2] == 'get-game-state')
   {
     var player_set = game_obj.getPlayerSet();
@@ -472,7 +460,7 @@ function handle_game_channel(socket,user_id,components){
     game_state.bullet_set = new_bullet_set;
 
     emit_game_state(socket,game_id,game_state);
-  }
+  }// get-game-state
   else if(components[2] == 'leave-game')
   {
     try
@@ -483,7 +471,12 @@ function handle_game_channel(socket,user_id,components){
     {
       log('handle_game_channel::leave-game','error while removing a player from the game');
     }
-  }
+  }// leave-game
+  else
+  {
+    var message = "invalid message format";
+    emit_message_to_client(socket,in_app,message); 
+  } // invalid message format
 }
 
 function emit_game_state(socket,game_id,game_state){

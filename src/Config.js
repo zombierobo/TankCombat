@@ -49,6 +49,7 @@
 		console.log('');
 	}
 	
+	// module exportable to both server and browser
 	if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
     	module.exports = Config;
   	else

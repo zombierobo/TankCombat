@@ -418,12 +418,10 @@
   Game.prototype.handle_bullet_collision = function(){
   }
 
+  // module exportable to both server and browser
   if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
     module.exports = Game;
   else
     window.Game = Game;
 
 }());
-
-//require('./lib_common.js');
-

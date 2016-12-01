@@ -89,35 +89,40 @@ function handle_server_message(socket,channel , message){
 Global.app_interval;
 
 function handle_app_channel(socket,components){
-		if(components[0] == 'list-of-games')
-		{
-			var new_games_list = JSON.parse(components[1]);
-			load_game_list(new_games_list);
-			log('handle_app_channel::list-of-games' , 'list-of-games : '+components[1]);
-		}
-		else if(components[0] == "joined-game")
-		{
-			var game_id = components[1];
-			log('handle_app_channel::joined-game' , 'game-joined : '+game_id);
-			Global.game_id = game_id;
-			change_client_state(in_lobby);
-		}
-		else if(components[0] == "game-room-full")
-		{
-			var game_id = components[1];
-			log('handle_app_channel::game-room-full' , 'game_id : '+ game_id + 'game room full');
-		}
-		else if(components[0] == "game-creation-successful")
-		{
-			var new_game_id = components[1];
-			Global.game_id = new_game_id;
-			log('handle_app_channel::game-creation-successful' , 'game-creation-successful : '+new_game_id);
-			change_client_state(in_lobby);
-		}
-		else if(components[0] == "game-creation-unsuccessful")
-		{
-			log('handle_app_channel::game-creation-unsuccessful' ,'game-creation-unsuccessful : something went wrong during game creation on the server side');
-		}
+	
+	if(components[0] == 'list-of-games')
+	{
+		var new_games_list = JSON.parse(components[1]);
+		load_game_list(new_games_list);
+		log('handle_app_channel::list-of-games' , 'list-of-games : '+components[1]);
+	}
+	else if(components[0] == "joined-game")
+	{
+		var game_id = components[1];
+		log('handle_app_channel::joined-game' , 'game-joined : '+game_id);
+		Global.game_id = game_id;
+		change_client_state(in_lobby);
+	}
+	else if(components[0] == "game-room-full")
+	{
+		var game_id = components[1];
+		log('handle_app_channel::game-room-full' , 'game_id : '+ game_id + 'game room full');
+	}
+	else if(components[0] == "game-creation-successful")
+	{
+		var new_game_id = components[1];
+		Global.game_id = new_game_id;
+		log('handle_app_channel::game-creation-successful' , 'game-creation-successful : '+new_game_id);
+		change_client_state(in_lobby);
+	}
+	else if(components[0] == "game-creation-unsuccessful")
+	{
+		log('handle_app_channel::game-creation-unsuccessful' ,'game-creation-unsuccessful : something went wrong during game creation on the server side');
+	}
+	else
+	{
+		log('handle_app_channel','unrecognized message');
+	}
 }
 
 function refresh_game_list(){
@@ -207,6 +212,10 @@ function handle_lobby_channel(socket,components){
 		var game_id = components[1];
 		log('handle_lobby_channel::game-terminated' , 'game game-terminated , game_id : '+game_id);
 		change_client_state(in_app);		
+	}
+	else
+	{
+		log('handle_lobby_channel' , 'unrecognized message');
 	}
 }
 
@@ -348,13 +357,8 @@ function main_game_loop(){
 }
 
 function handle_key_stroke(){
-	//if(Global.player_set == null)
-	//	return false;
-	//console.log('handle_key_stroke');
 	
 	var keyboard = Global.keyboard;
-
-	//var myTank = player_set[Global.user_id].getTank();
 
 	var commandSet = {};
 	commandSet.isUpArrow = keyboard.pressed('up');
@@ -380,96 +384,7 @@ function handle_key_stroke(){
 	}
 	if(is_command)
 		send_update_to_server(Global.user_id , Global.game_id , commandSet , command_no , time_stamp);
-	
-	/*
-	var dummy_tank = handle_tank_movement(t1,commandSet);
-
-	if(areTankOverlapping(dummy_tank , t2))
-	{
-		console.log('collission occurs on move');
-	}
-	else
-	{	t1.set_tank_position(dummy_tank.get_tank_position());
-		t1.set_tank_angle(dummy_tank.get_tank_angle());
-		t1.set_gun_angle(dummy_tank.get_gun_angle());
-	}
-	*/
 }
-
-function handle_tank_movement(tank_obj ,commandSet){
-
-  var tank_rotation = 2;//this.tank_control_config.tank_rotation; // degrees
-  var gun_rotation = 2;//this.tank_control_config.gun_rotation; // degrees
-  var position_offset = 2;//this.tank_control_config.position_offset;
-
-  if( commandSet.isUpArrow && commandSet.isDownArrow)
-  {
-    // conflicting keystrokes
-    commandSet.isDownArrow = commandSet.isUpArrow = false;
-  }
-  if(commandSet.isLeftArrow && commandSet.isRightArrow )
-  {
-    // conflicting keystrokes
-    commandSet.isLeftArrow = commandSet.isRightArrow = false;
-  }
-  if(commandSet.isApressed && commandSet.isDpressed)
-  {
-    // conflicting keystrokes
-    commandSet.isApressed = commandSet.isDpressed = false ;
-  }
-
-  var new_tank_position = {};
-  new_tank_position.x = tank_obj.get_tank_position().x ;
-  new_tank_position.y = tank_obj.get_tank_position().y ;
-  var new_tank_angle = tank_obj.get_tank_angle();
-  var new_gun_angle = tank_obj.get_gun_angle();
-  
-  // tank position update 
-  if(commandSet.isUpArrow || commandSet.isDownArrow)
-  {
-    var tank_position = tank_obj.get_tank_position();
-    var tank_angle = tank_obj.get_tank_angle();
-
-    if(commandSet.isUpArrow)
-    {
-      new_tank_position.x = tank_position.x + position_offset * Math.cos(tank_angle * Math.PI/180);
-      new_tank_position.y = tank_position.y - position_offset * Math.sin(tank_angle * Math.PI/180); 
-    }
-    else // isDownArrow
-    {
-      new_tank_position.x = tank_position.x - position_offset * Math.cos(tank_angle * Math.PI/180);
-      new_tank_position.y = tank_position.y + position_offset * Math.sin(tank_angle * Math.PI/180);   
-      tank_rotation = 0 - tank_rotation;
-    }
-
-  }
-
-  // tank angle update
-  if(commandSet.isLeftArrow)
-  {
-    new_tank_angle += tank_rotation;
-    new_gun_angle += tank_rotation;
-  }
-  else if(commandSet.isRightArrow)
-  {
-    new_tank_angle -= tank_rotation;
-    new_gun_angle -= tank_rotation;
-  }
-
-  // gun angle updation
-  if(commandSet.isApressed)
-    new_gun_angle += gun_rotation;
-  else if(commandSet.isDpressed)
-    new_gun_angle -= gun_rotation;
-
-
-  dummy_tank.set_tank_position(new_tank_position);
-  dummy_tank.set_tank_angle(new_tank_angle);
-  dummy_tank.set_gun_angle(new_gun_angle);
-
-  return dummy_tank;
-}
-
 
 function send_update_to_server(user_id ,game_id,commandSet,command_no,time_stamp){
 	//console.log('send_update_to_server')
@@ -538,14 +453,8 @@ function render_game(){
 		var bullet = bullet_set[user_id];
 		var current_position = bullet.current_position;
 		var bullet_angle = bullet.bullet_angle;
-		//Bullet = function (width , length , color , current_position , projection_angle){
 		var bullet_obj = new Bullet(bullet_model_settings.width , bullet_model_settings.length , bullet_model_settings.color , 
 									current_position , bullet_angle);
-		
-		//console.log('bullet angle : '+bullet_angle);
-		//console.log('bullet position : '+JSON.stringify(current_position));
-      	//console.log('gun tip :  '+JSON.stringify(my_tank_obj.get_gun_tip()));
-
 		bullet_obj.render(Global.ctx);
 	}
 

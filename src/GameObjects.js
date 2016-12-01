@@ -515,6 +515,7 @@
 	GameObjects.areTankOverlapping = areTankOverlapping;
 	GameObjects.areBulletTankOverlapping = areBulletTankOverlapping;
 
+	// module exportable to both server and browser
     if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
             module.exports = GameObjects;
     else    
