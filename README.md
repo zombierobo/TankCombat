@@ -18,4 +18,4 @@ start the server
 
 node src/server.js port_number
 
-clients can join by visiting the server on its http://<ip-address>:<port-number>
+clients can join by visiting the server on its http://ip-address:port-number
