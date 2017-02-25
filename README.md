@@ -1,19 +1,20 @@
 # TankCombat
 
-a simple web based multiplayer game implemented using socket.io on node.js using express web server
+A simple web based multiplayer tank shooting game implemented with socket.io on nodejs using express web server
 
-Client side rendering of the game is implemented using HTML5 Canvas Api.
+## Requirements
+nodejs
 
-Dependency
-
-1) express  
-2) socket.io
+## Package dependencies 
+(install each of the dependency with the help of (node package manager) npm install <dependency-name> )
+1) Express  
+2) Socket.io
 3) node-uuid
 
-install each of the dependency with the help of npm install <dependency-name> 
 
+## Execution
 start the server
 
 node src/server.js port_number
 
-clients can join by visiting the server on its ip and port number.
+clients can join by visiting the server on its http://<ip-address>:<port-number> 
